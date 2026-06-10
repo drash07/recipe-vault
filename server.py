@@ -177,4 +177,9 @@ print("  Ctrl+C to stop")
 print("=" * 45)
 print()
 try:
-    server = http.server.HTTPServer(("127.0.0.1",
+    server = http.server.HTTPServer(("127.0.0.1", PORT), H)
+    server.serve_forever()
+except OSError as e:
+    print(f"\n  ERROR: Could not start on port {PORT} — {e}")
+    print(f"  Try changing PORT at the top of server.py to a different number (e.g. 3001).")
+    input("  Press Enter to exit...")
