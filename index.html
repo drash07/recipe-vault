@@ -230,7 +230,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <div class="modal-overlay" id="smart-plan-modal">
   <div class="modal"><div class="modal-handle"></div>
     <div class="modal-title">🎲 Smart Meal Plan</div>
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">AI picks 5 days of meals based on your taste. 2 days marked as outside food. Tap any meal to swap it.</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Picks 5 days of meals from your recipe vault. Weekend days default to outside food. Tap any meal to swap it.</div>
     <div id="smart-plan-content"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Tap Generate to get your plan!</div></div>
     <button class="btn btn-primary btn-full" id="smart-plan-btn" onclick="generateSmartPlan()" style="margin-top:10px">🎲 Generate plan</button>
     <button class="btn btn-leaf btn-full" id="smart-plan-save-btn" onclick="saveSmartPlan()" style="margin-top:7px;display:none">✓ Save this plan</button>
@@ -239,7 +239,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 </div>
 <div class="modal-overlay" id="suggest-modal">
   <div class="modal"><div class="modal-handle"></div><div class="modal-title">✨ AI Meal Suggestions</div>
-    <div id="suggestions-content"><div style="text-align:center;padding:18px 0;color:var(--text-muted);font-size:13px">Vegetarian · Eggs OK · No sugar · ≤30 mins</div></div>
+    <div id="suggestions-content"><div style="text-align:center;padding:18px 0;color:var(--text-muted);font-size:13px">Gemini picks from your vault, avoiding repeats from the rest of the week.</div></div>
     <button class="btn btn-primary btn-full" id="suggest-btn" onclick="getSuggestions()">Get suggestions for this day</button>
     <button class="btn btn-outline btn-full" style="margin-top:7px" onclick="closeModal('suggest-modal')">Cancel</button>
   </div>
@@ -290,7 +290,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 const GEMINI_KEY = '__GEMINI_KEY__';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 const SURL = '__SUPABASE_URL__';
 const SKEY = '__SUPABASE_KEY__';
@@ -311,10 +311,16 @@ let db = null;
 
 // ── SUPABASE INIT ────────────────────────────────────────────────────────────
 function initDB() {
+  if (!SURL || !SKEY || SURL === '__SUPABASE_URL__' || SKEY === '__SUPABASE_KEY__') {
+    hideStatus();
+    showError('⚠️ Database not configured — add SUPABASE_URL and SUPABASE_KEY to your .env file and restart the server.');
+    return false;
+  }
   try {
     db = window.supabase.createClient(SURL, SKEY);
     return true;
   } catch(e) {
+    hideStatus();
     showError('Could not connect to database. Please check your internet connection.');
     return false;
   }
@@ -440,7 +446,10 @@ const DEFAULT_RECIPES = [
 function getWeekStart() {
   const d = new Date();
   d.setHours(0,0,0,0);
-  d.setDate(d.getDate() - d.getDay() + weekOffset * 7);
+  // Always anchor to Monday so all 7 days of the Mon–Sun grid share the same week_start key
+  const dow = d.getDay(); // 0=Sun, 1=Mon … 6=Sat
+  const daysToMonday = dow === 0 ? -6 : 1 - dow;
+  d.setDate(d.getDate() + daysToMonday + weekOffset * 7);
   return d.toISOString().split('T')[0];
 }
 
@@ -449,6 +458,8 @@ async function loadRecipes() {
   const { data, error } = await db.from('recipes').select('*');
   if (error) {
     showError('Could not load recipes: ' + error.message);
+    recipes = DEFAULT_RECIPES;
+    renderRecipes();
     hideStatus();
     return;
   }
@@ -793,53 +804,127 @@ async function changeWeek(delta) {
 }
 
 function openSuggestModal() {
-  document.getElementById('suggestions-content').innerHTML = '<div style="text-align:center;padding:18px 0;color:var(--text-muted);font-size:13px">Vegetarian · Eggs OK · No sugar · Inspired by your saves</div>';
+  document.getElementById('suggestions-content').innerHTML = '<div style="text-align:center;padding:18px 0;color:var(--text-muted);font-size:13px">Gemini picks from your vault, avoiding repeats from the rest of the week.</div>';
   document.getElementById('suggest-btn').style.display = '';
   document.getElementById('suggest-btn').textContent = 'Get suggestions for this day';
   document.getElementById('suggest-modal').classList.add('open');
 }
 
 let aiSuggestions = [];
-function getSuggestions() {
+async function getSuggestions() {
   aiSuggestions = [];
   const btn = document.getElementById('suggest-btn');
-  const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-  const breakfasts = shuffle(recipes.filter(r => r.type === 'Breakfast' || r.type === 'Both'));
-  const dinners = shuffle(recipes.filter(r => r.type === 'Dinner' || r.type === 'Both'));
-  const picked = { breakfast: breakfasts.slice(0, 2), dinner: dinners.slice(0, 2) };
-  let html = '<div class="ai-tip">💡 <strong>Tip:</strong> These are picked from your saved recipe vault — tap to plan!</div>';
-  ['breakfast', 'dinner'].forEach(m => {
-    html += '<div class="section-label">' + m.charAt(0).toUpperCase() + m.slice(1) + ' ideas</div>';
-    picked[m].forEach(r => {
-      const idx = aiSuggestions.length;
-      aiSuggestions.push({r, type: m.charAt(0).toUpperCase() + m.slice(1)});
-      html += '<div class="ai-card">' +
-        '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">' +
-          '<span style="font-size:20px">' + (r.emoji || '🍽') + '</span>' +
-          '<strong style="font-size:13px">' + r.name + '</strong>' +
-          '<span style="font-size:11px;color:var(--text-muted);margin-left:auto">⏱ ' + r.time + 'm</span>' +
-        '</div>' +
-        '<div style="margin-top:5px;display:flex;gap:3px">' + (r.tags || []).slice(0,3).map(t => '<span class="recipe-tag">' + t + '</span>').join('') + '</div>' +
-        '<button class="btn btn-primary btn-sm btn-full" style="margin-top:9px" onclick="addAiRecipeStored(' + idx + ',&quot;' + m.charAt(0).toUpperCase() + m.slice(1) + '&quot;)">+ Plan for ' + DAYS[selectedDay] + '</button>' +
-      '</div>';
-    });
-  });
-  document.getElementById('suggestions-content').innerHTML = html;
-  btn.textContent = '🔀 Shuffle';
-  btn.disabled = false;
-}
+  btn.innerHTML = '<span class="spinner"></span> Thinking...';
+  btn.disabled = true;
+  document.getElementById('suggestions-content').innerHTML =
+    '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Asking Gemini for ideas based on your vault...</div>';
 
-async function addAiRecipe(r, type) {
-  const recipe = { id: Date.now(), name: r.name, time: r.time, type: type, emoji: r.emoji, ingredients: [], tags: r.tags || [], steps: [], source: 'ai', board: null };
-  const ok = await upsertRecipe(recipe);
-  if (ok) {
-    recipes.push(recipe);
-    if (!mealPlan[selectedDay]) mealPlan[selectedDay] = {};
-    mealPlan[selectedDay][type.toLowerCase()] = recipe;
-    await saveMealSlot(selectedDay, type.toLowerCase(), recipe);
-    closeModal('suggest-modal');
-    renderWeekGrid();
-    renderMealSlots();
+  // Build context: what's already planned this week (for variety)
+  const FULL_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const dayName = FULL_DAYS[selectedDay];
+  const alreadyPlanned = [];
+  Object.entries(mealPlan).forEach(([dayIdx, meals]) => {
+    if (parseInt(dayIdx) === selectedDay) return; // skip the day we're suggesting for
+    if (meals.breakfast && meals.breakfast.name) alreadyPlanned.push(meals.breakfast.name);
+    if (meals.dinner   && meals.dinner.name)    alreadyPlanned.push(meals.dinner.name);
+  });
+
+  // Summarise vault for the prompt (name + type + time + tags only — keep prompt short)
+  const vaultSummary = recipes.map(r =>
+    r.name + ' (' + r.type + ', ' + r.time + 'min' + (r.tags && r.tags.length ? ', ' + r.tags.slice(0,3).join('/') : '') + ')'
+  ).join('; ');
+
+  const prompt =
+    'You are a meal planning assistant. From the recipe vault below, pick the BEST 2 breakfast and 2 dinner options for ' + dayName + '.\n' +
+    'Rules:\n' +
+    '- Only choose recipes that exist in the vault — do not invent new ones.\n' +
+    '- Avoid repeating meals already planned this week: ' + (alreadyPlanned.length ? alreadyPlanned.join(', ') : 'none yet') + '.\n' +
+    '- Prefer variety in cuisine and cooking time.\n' +
+    '- Return ONLY a JSON object, no markdown:\n' +
+    '{"breakfast":["Recipe Name 1","Recipe Name 2"],"dinner":["Recipe Name 1","Recipe Name 2"],"reason":"One sentence explaining your picks."}\n\n' +
+    'Recipe vault: ' + vaultSummary;
+
+  // Guard: need recipes to suggest from
+  if (!recipes.length) {
+    document.getElementById('suggestions-content').innerHTML =
+      '<div class="ai-tip" style="background:#FEF0F0;border-color:#F5A0A0">⚠️ No recipes in your vault yet — add some first.</div>';
+    btn.textContent = '↩ Retry';
+    btn.disabled = false;
+    return;
+  }
+
+  // Fuzzy name match: exact → includes → any shared word
+  const findRecipe = name => {
+    const n = name.toLowerCase().trim();
+    return recipes.find(r => r.name.toLowerCase() === n) ||
+           recipes.find(r => r.name.toLowerCase().includes(n)) ||
+           recipes.find(r => n.includes(r.name.toLowerCase())) ||
+           recipes.find(r => r.name.toLowerCase().split(' ').some(w => w.length > 3 && n.includes(w)));
+  };
+
+  try {
+    const res = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, maxTokens: 400 })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      const detail = (data && data.error) ? data.error : ('Server error ' + res.status);
+      throw new Error(detail);
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(data.text);
+    } catch(e) {
+      // Log the raw response to console so we can debug
+      console.error('Gemini raw response:', data.text);
+      throw new Error('Gemini returned unexpected format — see browser console for raw response');
+    }
+
+    let html = '';
+    if (parsed.reason) {
+      html += '<div class="ai-tip">✨ <strong>Gemini says:</strong> ' + parsed.reason + '</div>';
+    }
+
+    ['breakfast', 'dinner'].forEach(m => {
+      const names = parsed[m] || [];
+      const matched = names.map(findRecipe).filter(Boolean);
+      if (!matched.length) {
+        // Log unmatched names so we can see what Gemini returned
+        console.warn('AI suggested ' + m + ' names not found in vault:', names);
+        return;
+      }
+      html += '<div class="section-label">' + m.charAt(0).toUpperCase() + m.slice(1) + ' ideas</div>';
+      matched.forEach(r => {
+        const idx = aiSuggestions.length;
+        aiSuggestions.push({ r, type: m.charAt(0).toUpperCase() + m.slice(1) });
+        html += '<div class="ai-card">' +
+          '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">' +
+            '<span style="font-size:20px">' + (r.emoji || '🍽') + '</span>' +
+            '<strong style="font-size:13px">' + r.name + '</strong>' +
+            '<span style="font-size:11px;color:var(--text-muted);margin-left:auto">⏱ ' + r.time + 'm</span>' +
+          '</div>' +
+          '<div style="margin-top:5px;display:flex;gap:3px">' + (r.tags || []).slice(0,3).map(t => '<span class="recipe-tag">' + t + '</span>').join('') + '</div>' +
+          '<button class="btn btn-primary btn-sm btn-full" style="margin-top:9px" onclick="addAiRecipeStored(' + idx + ',&quot;' + m.charAt(0).toUpperCase() + m.slice(1) + '&quot;)">+ Plan for ' + DAYS[selectedDay] + '</button>' +
+        '</div>';
+      });
+    });
+
+    if (!html) {
+      console.warn('Parsed AI response:', parsed);
+      throw new Error('Gemini suggested names not found in vault — check console for details');
+    }
+    document.getElementById('suggestions-content').innerHTML = html;
+    btn.textContent = '🔀 Ask again';
+    btn.disabled = false;
+
+  } catch(err) {
+    document.getElementById('suggestions-content').innerHTML =
+      '<div class="ai-tip" style="background:#FEF0F0;border-color:#F5A0A0">⚠️ ' + err.message + '</div>';
+    btn.textContent = '↩ Retry';
+    btn.disabled = false;
   }
 }
 
@@ -1138,6 +1223,7 @@ function renderRecipes(q) {
   else if (activeFilter === 'Snack') filtered = filtered.filter(r => r.type === 'Snack');
   else if (activeFilter === 'Dessert') filtered = filtered.filter(r => r.type === 'Dessert');
   else if (activeFilter === 'Salad') filtered = filtered.filter(r => r.type === 'Salad');
+  else if (activeFilter === 'Soup') filtered = filtered.filter(r => r.board === 'Soups');
   else if (activeFilter === 'pinterest') filtered = filtered.filter(r => r.source === 'pinterest');
   document.getElementById('recipe-count').textContent = recipes.length;
   const times = recipes.map(r => r.time).filter(Boolean);
@@ -1183,13 +1269,25 @@ async function saveNewRecipe() {
 async function importFromUrl() {
   const url = document.getElementById('url-import-input').value.trim();
   if (!url || !url.startsWith('http')) { alert('Please enter a valid URL.'); return; }
+
+  // URL import requires the local server to fetch the page \u2014 can't work from GitHub Pages / phone
+  if (!['localhost', '127.0.0.1'].includes(location.hostname)) {
+    alert('URL import requires the local server.\nRun: python server.py\nThen open http://localhost:8080');
+    return;
+  }
+
   const btn = document.getElementById('url-import-btn');
-  btn.innerHTML = '<span class="spinner"></span> Reading...';
+  btn.innerHTML = '<span class="spinner"></span> Fetching...';
   btn.disabled = true;
   try {
-        const importPrompt = 'Extract the recipe from this URL: ' + url + '. Respond ONLY in JSON (no markdown): {"name":"","time":25,"type":"Dinner","emoji":"\uD83C\uDF5B","ingredients":[],"steps":[],"tags":[],"sourceUrl":"' + url + '"}. If no recipe found: {"error":"No recipe found"}';
-    const text = await callAI(importPrompt, 1500);
-    const parsed = parseAIJson(text);
+    const res = await fetch('/api/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+    if (data.error) { btn.textContent = '\uD83D\uDD17 Import from URL'; btn.disabled = false; alert(data.error); return; }
+    const parsed = parseAIJson(data.text);
     if (parsed.error) { btn.textContent = '🔗 Import from URL'; btn.disabled = false; alert('No recipe found on that page.'); return; }
     pendingImport = parsed;
     const stepsHtml = (parsed.steps && parsed.steps.length)
@@ -1344,6 +1442,16 @@ function generateSmartPlan() {
   const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
   const dinners  = shuffle(recipes.filter(r => r.type === 'Dinner'    || r.type === 'Both'));
   const bfasts   = shuffle(recipes.filter(r => r.type === 'Breakfast' || r.type === 'Both'));
+
+  if (!dinners.length || !bfasts.length) {
+    document.getElementById('smart-plan-content').innerHTML =
+      '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">' +
+      'Add some Dinner and Breakfast recipes first to generate a plan!</div>';
+    btn.textContent = '✨ Generate Plan';
+    btn.disabled = false;
+    return;
+  }
+
   const FULL_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
   const OUTSIDE_CUISINES = ['Indian', 'Thai', 'Mexican', 'Italian', 'Japanese', 'Mediterranean'];
 
@@ -1546,105 +1654,4 @@ function findByIngredients() {
 
 let _generatedRecipe = null;
 
-async function generateRecipeFromIngredients() {
-  const input = document.getElementById('ing-input').value;
-  if (!input.trim()) { showError('Enter at least one ingredient first'); return; }
-  const btn = document.getElementById('gen-recipe-btn');
-  btn.innerHTML = '<span class="spinner"></span> Creating...';
-  btn.disabled = true;
-  const prompt = 'Create a vegetarian recipe (eggs OK, no sugar, no store protein powder) using these ingredients: ' + input + '. Return ONLY a JSON object: {"name":"...","time":25,"type":"Dinner","emoji":"🍛","tags":["tag1"],"ingredients":["qty ingredient"],"steps":["Step 1","Step 2"]}. type must be one of: Dinner, Breakfast, Snack, Dessert, Salad, Both.';
-  try {
-    const text = await callAI(prompt, 900);
-    const data = parseAIJson(text);
-    _generatedRecipe = data;
-    let html = '<div style="background:var(--leaf-light);border:1px solid var(--leaf);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px">' +
-      '<div style="font-size:16px;font-weight:500;margin-bottom:4px">' + (data.emoji || '🍽') + ' ' + data.name + '</div>' +
-      '<div style="font-size:11px;color:var(--text-muted);margin-bottom:7px">⏱ ' + data.time + ' mins · ' + data.type + '</div>' +
-      '<div style="font-size:11px;font-weight:600;margin-bottom:3px">Ingredients</div>' +
-      '<div style="font-size:11px;color:var(--text-muted);margin-bottom:7px">' + (data.ingredients || []).join(', ') + '</div>' +
-      '<div style="font-size:11px;font-weight:600;margin-bottom:3px">Steps</div>' +
-      (data.steps || []).map((s, i) => '<div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">' + (i+1) + '. ' + s + '</div>').join('') +
-    '</div>' +
-    '<button class="btn btn-leaf btn-full" onclick="saveGeneratedRecipe()">💾 Save to my recipes</button>';
-    document.getElementById('ing-results').innerHTML = html;
-  } catch(e) {
-    showError('AI unavailable — showing vault matches instead');
-    findByIngredients();
-  }
-  btn.innerHTML = '✨ Generate recipe';
-  btn.disabled = false;
-}
-
-async function saveGeneratedRecipe() {
-  if (!_generatedRecipe) return;
-  const recipe = {
-    id: Date.now(),
-    name: _generatedRecipe.name,
-    time: parseInt(_generatedRecipe.time) || 30,
-    type: _generatedRecipe.type || 'Dinner',
-    emoji: _generatedRecipe.emoji || '🍽',
-    tags: _generatedRecipe.tags || [],
-    ingredients: _generatedRecipe.ingredients || [],
-    steps: _generatedRecipe.steps || [],
-    source: 'ai',
-    board: null
-  };
-  const ok = await upsertRecipe(recipe);
-  if (ok) {
-    recipes.push(recipe);
-    renderRecipes();
-    showStatus('Recipe saved to your vault!');
-    closeModal('ingredients-modal');
-    _generatedRecipe = null;
-  }
-}
-
-async function callAI(prompt, maxTokens) {
-  const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
-  if (isLocal) {
-    // Local dev: use Python server proxy
-    const res = await fetch('/api/ai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, maxTokens: maxTokens || 1200 })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return data.text;
-  } else {
-    // Production (GitHub Pages / phone): call Gemini directly
-    const res = await fetch(GEMINI_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_KEY },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: maxTokens || 1200, temperature: 0.7 }
-      })
-    });
-    if (!res.ok) {
-      const e = await res.json().catch(() => ({}));
-      throw new Error(e.error?.message || 'Gemini error ' + res.status);
-    }
-    const data = await res.json();
-    let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-    return text;
-  }
-}
-
-// ── INIT ─────────────────────────────────────────────────────────────────────
-async function init() {
-  showStatus('Connecting to your vault...', 'var(--leaf)');
-  const ok = initDB();
-  if (!ok) return;
-  await loadRecipes();
-  await loadMealPlan();
-  await loadGroceries();
-  showStatus('✓ Connected to Recipe Vault', 'var(--leaf)');
-  setTimeout(hideStatus, 2000);
-}
-
-init();
-</script>
-</body>
-</html>
+async function generateRecipeFro
