@@ -1654,4 +1654,113 @@ function findByIngredients() {
 
 let _generatedRecipe = null;
 
-async function generateRecipeFro
+async function generateRecipeFromIngredients() {
+  const input = document.getElementById('ing-input').value;
+  if (!input.trim()) { showError('Enter at least one ingredient first'); return; }
+  const btn = document.getElementById('gen-recipe-btn');
+  btn.innerHTML = '<span class="spinner"></span> Creating...';
+  btn.disabled = true;
+  const prompt = 'Create a vegetarian recipe (eggs OK, no sugar, no store protein powder) using these ingredients: ' + input + '. Return ONLY a JSON object: {"name":"...","time":25,"type":"Dinner","emoji":"🍛","tags":["tag1"],"ingredients":["qty ingredient"],"steps":["Step 1","Step 2"]}. type must be one of: Dinner, Breakfast, Snack, Dessert, Salad, Both.';
+  try {
+    const text = await callAI(prompt, 900);
+    const data = parseAIJson(text);
+    _generatedRecipe = data;
+    let html = '<div style="background:var(--leaf-light);border:1px solid var(--leaf);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px">' +
+      '<div style="font-size:16px;font-weight:500;margin-bottom:4px">' + (data.emoji || '🍽') + ' ' + data.name + '</div>' +
+      '<div style="font-size:11px;color:var(--text-muted);margin-bottom:7px">⏱ ' + data.time + ' mins · ' + data.type + '</div>' +
+      '<div style="font-size:11px;font-weight:600;margin-bottom:3px">Ingredients</div>' +
+      '<div style="font-size:11px;color:var(--text-muted);margin-bottom:7px">' + (data.ingredients || []).join(', ') + '</div>' +
+      '<div style="font-size:11px;font-weight:600;margin-bottom:3px">Steps</div>' +
+      (data.steps || []).map((s, i) => '<div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">' + (i+1) + '. ' + s + '</div>').join('') +
+    '</div>' +
+    '<button class="btn btn-leaf btn-full" onclick="saveGeneratedRecipe()">💾 Save to my recipes</button>';
+    document.getElementById('ing-results').innerHTML = html;
+  } catch(e) {
+    showError('AI unavailable — showing vault matches instead');
+    findByIngredients();
+  }
+  btn.innerHTML = '✨ Generate recipe';
+  btn.disabled = false;
+}
+
+async function saveGeneratedRecipe() {
+  if (!_generatedRecipe) return;
+  const recipe = {
+    id: Date.now(),
+    name: _generatedRecipe.name,
+    time: parseInt(_generatedRecipe.time) || 30,
+    type: _generatedRecipe.type || 'Dinner',
+    emoji: _generatedRecipe.emoji || '🍽',
+    tags: _generatedRecipe.tags || [],
+    ingredients: _generatedRecipe.ingredients || [],
+    steps: _generatedRecipe.steps || [],
+    source: 'ai',
+    board: null
+  };
+  const ok = await upsertRecipe(recipe);
+  if (ok) {
+    recipes.push(recipe);
+    renderRecipes();
+    showStatus('Recipe saved to your vault!');
+    closeModal('ingredients-modal');
+    _generatedRecipe = null;
+  }
+}
+
+async function callAI(prompt, maxTokens) {
+  const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+  if (isLocal) {
+    // Local dev: use Python server proxy
+    const res = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, maxTokens: maxTokens || 1200 })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data.text;
+  } else {
+    // Production (GitHub Pages / phone): call Gemini directly
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_KEY },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: maxTokens || 1200, temperature: 0.7 }
+      })
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error?.message || 'Gemini error ' + res.status);
+    }
+    const data = await res.json();
+    let text = data.candidates[0].content.parts[0].text;
+    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+    return text;
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+async function init() {
+  showStatus('Connecting to your vault...', 'var(--leaf)');
+  const ok = initDB();
+  // Always render the calendar shell so the UI isn't blank
+  renderWeekGrid();
+  renderMealSlots();
+  if (!ok) {
+    // Fall back to bundled defaults so recipes are browsable offline
+    recipes = DEFAULT_RECIPES;
+    renderRecipes();
+    return;
+  }
+  await loadRecipes();
+  await loadMealPlan();
+  await loadGroceries();
+  showStatus('✓ Connected to Recipe Vault', 'var(--leaf)');
+  setTimeout(hideStatus, 2000);
+}
+
+init();
+</script>
+</body>
+</html>
