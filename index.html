@@ -33,9 +33,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .chip{display:inline-flex;align-items:center;gap:3px;background:var(--saffron-light);color:var(--saffron-dark);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:500}
 .chip-green{background:var(--leaf-light);color:var(--leaf);display:inline-flex;align-items:center;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:500}
 .chip-yellow{background:var(--turmeric-light);color:#7A5200;display:inline-flex;align-items:center;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:500}
-.week-grid{display:flex;gap:4px;padding-bottom:4px;scrollbar-width:none;margin-bottom:10px}
+.week-grid{display:flex;gap:4px;padding-bottom:4px;scrollbar-width:none;margin-bottom:10px;overflow-x:auto}
 .week-grid::-webkit-scrollbar{display:none}
-.day-pill{flex:1;border-radius:10px;padding:7px 3px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:1.5px solid var(--border);background:#fff;transition:all .2s;min-width:0}
+.day-pill{flex:1;min-width:40px;border-radius:10px;padding:7px 3px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:1.5px solid var(--border);background:#fff;transition:all .2s}
 .day-pill.active{border-color:var(--saffron);background:var(--saffron-light)}
 .day-pill .day-name{font-size:9px;color:var(--text-muted);font-weight:600;letter-spacing:.04em}
 .day-pill .day-num{font-size:15px;font-weight:500}
@@ -88,11 +88,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .input:focus{border-color:var(--saffron)}
 .input-label{font-size:11px;font-weight:500;color:var(--text-muted);margin-bottom:4px;display:block}
 .input-group{margin-bottom:12px}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end;justify-content:center;overflow:hidden}
-.modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:18px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;flex-shrink:0}
+.modal-overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:200;align-items:flex-end;justify-content:center;overflow:hidden;visibility:hidden;pointer-events:none;transition:background .25s,visibility 0s .3s}
+.modal-overlay.open{background:rgba(0,0,0,.45);visibility:visible;pointer-events:auto;transition:background .25s,visibility 0s}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:18px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;position:relative;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.23,1)}
+.modal-overlay.open .modal{transform:translateY(0)}
 .modal-handle{width:34px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 14px}
-.modal-title{font-family:Playfair Display,serif;font-size:17px;font-weight:600;margin-bottom:14px}
+.modal-title{font-family:Playfair Display,serif;font-size:17px;font-weight:600;margin-bottom:14px;padding-right:32px}
+.modal-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;border:none;background:var(--bg);color:var(--text-muted);font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s}
+.modal-close:hover{background:var(--border)}
 .prep-task{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px}
 .prep-task-name{font-size:13px;font-weight:500}
 .prep-task-detail{font-size:11px;color:var(--text-muted);margin-top:2px;line-height:1.5}
@@ -186,7 +189,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="filter-chip" onclick="setFilter('Dessert',this)">🍮 Desserts</button>
     <button class="filter-chip" onclick="setFilter('Salad',this)">🥗 Salads</button>
     <button class="filter-chip" onclick="setFilter('Soup',this)">🍲 Soups</button>
-    <button class="filter-chip" onclick="setFilter('pinterest',this)">📌 Pinterest</button>
+    <button class="filter-chip" onclick="setFilter('Dip',this)">🫙 Dips & Dressings</button>
   </div>
   <div id="recipes-list"></div>
   <div style="display:flex;gap:7px;margin-top:4px">
@@ -229,46 +232,51 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 </nav>
 <div class="modal-overlay" id="smart-plan-modal">
   <div class="modal"><div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('smart-plan-modal')">×</button>
     <div class="modal-title">🎲 Smart Meal Plan</div>
     <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">AI picks 5 days of meals based on your taste. 2 days marked as outside food. Tap any meal to swap it.</div>
     <div id="smart-plan-content"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Tap Generate to get your plan!</div></div>
     <button class="btn btn-primary btn-full" id="smart-plan-btn" onclick="generateSmartPlan()" style="margin-top:10px">🎲 Generate plan</button>
     <button class="btn btn-leaf btn-full" id="smart-plan-save-btn" onclick="saveSmartPlan()" style="margin-top:7px;display:none">✓ Save this plan</button>
-    <button class="btn btn-outline btn-full" style="margin-top:7px" onclick="closeModal('smart-plan-modal')">Cancel</button>
   </div>
 </div>
 <div class="modal-overlay" id="suggest-modal">
-  <div class="modal"><div class="modal-handle"></div><div class="modal-title">✨ AI Meal Suggestions</div>
+  <div class="modal"><div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('suggest-modal')">×</button>
+    <div class="modal-title">✨ AI Meal Suggestions</div>
     <div id="suggestions-content"><div style="text-align:center;padding:18px 0;color:var(--text-muted);font-size:13px">Vegetarian · Eggs OK · No sugar · ≤30 mins</div></div>
     <button class="btn btn-primary btn-full" id="suggest-btn" onclick="getSuggestions()">Get suggestions for this day</button>
-    <button class="btn btn-outline btn-full" style="margin-top:7px" onclick="closeModal('suggest-modal')">Cancel</button>
   </div>
 </div>
 <div class="modal-overlay" id="add-modal">
-  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Add Recipe</div>
+  <div class="modal"><div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('add-modal')">×</button>
+    <div class="modal-title">Add Recipe</div>
     <div class="input-group"><label class="input-label">Recipe name</label><input class="input" id="new-name" placeholder="e.g. Palak Tofu"/></div>
     <div class="input-group"><label class="input-label">Cook time (mins)</label><input class="input" id="new-time" type="number" placeholder="25"/></div>
     <div class="input-group"><label class="input-label">Meal type</label><select class="input" id="new-type"><option>Dinner</option><option>Breakfast</option><option>Snack</option><option>Dessert</option><option>Salad</option><option>Both</option></select></div>
     <div class="input-group"><label class="input-label">Ingredients (comma separated)</label><input class="input" id="new-ingredients" placeholder="spinach, tofu, onion"/></div>
     <div class="input-group"><label class="input-label">Steps (one per line)</label><textarea class="input" id="new-steps" rows="3" placeholder="Step 1&#10;Step 2" style="resize:none"></textarea></div>
     <button class="btn btn-primary btn-full" onclick="saveNewRecipe()">Save Recipe</button>
-    <button class="btn btn-outline btn-full" style="margin-top:7px" onclick="closeModal('add-modal')">Cancel</button>
   </div>
 </div>
 <div class="modal-overlay" id="recipe-detail-modal">
-  <div class="modal"><div class="modal-handle"></div><div id="recipe-detail-content"></div>
-    <button class="btn btn-outline btn-full" onclick="closeModal('recipe-detail-modal')">Close</button>
+  <div class="modal"><div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('recipe-detail-modal')">×</button>
+    <div id="recipe-detail-content"></div>
   </div>
 </div>
 <div class="modal-overlay" id="url-preview-modal">
-  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Recipe found 🎉</div>
+  <div class="modal"><div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('url-preview-modal')">×</button>
+    <div class="modal-title">Recipe found 🎉</div>
     <div id="url-preview-content"></div>
     <button class="btn btn-primary btn-full" onclick="saveImportedRecipe()">Save to Recipe Vault</button>
-    <button class="btn btn-outline btn-full" style="margin-top:7px" onclick="closeModal('url-preview-modal')">Cancel</button>
   </div>
 </div>
 <div class="modal-overlay" id="ingredients-modal">
   <div class="modal"><div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('ingredients-modal')">×</button>
     <div class="modal-title">🥦 What's in your kitchen?</div>
     <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Enter ingredients you want to use — I'll find matching recipes or create a new one.</div>
     <div class="input-group">
@@ -280,7 +288,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="btn btn-primary btn-full" id="gen-recipe-btn" onclick="generateRecipeFromIngredients()">✨ Generate recipe</button>
     </div>
     <div id="ing-results" style="margin-top:10px"></div>
-    <button class="btn btn-outline btn-full" style="margin-top:7px" onclick="closeModal('ingredients-modal')">Close</button>
   </div>
 </div>
 
@@ -537,6 +544,14 @@ function switchHomeTab(tab, el) {
   document.getElementById('home-plan').style.display = tab === 'plan' ? 'block' : 'none';
   document.getElementById('home-nutrition').style.display = tab === 'nutrition' ? 'block' : 'none';
   document.getElementById('home-prep').style.display = tab === 'prep' ? 'block' : 'none';
+  if (tab === 'nutrition') {
+    const cached = localStorage.getItem('rv_nut_' + getWeekStart());
+    if (cached) { try { renderNutrition(JSON.parse(cached)); document.getElementById('nut-btn').textContent = '🔄 Refresh'; } catch(e) {} }
+  }
+  if (tab === 'prep') {
+    const cached = localStorage.getItem('rv_prep_' + getWeekStart());
+    if (cached) { try { const p = JSON.parse(cached); document.getElementById('prep-timeline-content').innerHTML = renderPrepHtml(p); document.getElementById('prep-btn').textContent = '🔄 Regenerate'; } catch(e) {} }
+  }
 }
 
 function renderWeekGrid() {
@@ -641,8 +656,6 @@ function renderMealSlots() {
   });
   if (isWed) {
     html += '<div class="card-sm" style="background:#F5F5F5;border-style:dashed"><span style="font-size:11px;color:var(--text-muted)">🏢 Wednesday — lunch at work!</span></div>';
-  } else if (!isWeekend && day.dinner) {
-    html += '<div class="card-sm" style="background:#F5F5F5;border-style:dashed"><span style="font-size:11px;color:var(--text-muted)">🍱 Leftovers: ' + day.dinner.name + '</span></div>';
   }
   slots.innerHTML = html;
 }
@@ -800,33 +813,66 @@ function openSuggestModal() {
 }
 
 let aiSuggestions = [];
-function getSuggestions() {
+async function getSuggestions() {
   aiSuggestions = [];
   const btn = document.getElementById('suggest-btn');
-  const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-  const breakfasts = shuffle(recipes.filter(r => r.type === 'Breakfast' || r.type === 'Both'));
-  const dinners = shuffle(recipes.filter(r => r.type === 'Dinner' || r.type === 'Both'));
-  const picked = { breakfast: breakfasts.slice(0, 2), dinner: dinners.slice(0, 2) };
-  let html = '<div class="ai-tip">💡 <strong>Tip:</strong> These are picked from your saved recipe vault — tap to plan!</div>';
-  ['breakfast', 'dinner'].forEach(m => {
-    html += '<div class="section-label">' + m.charAt(0).toUpperCase() + m.slice(1) + ' ideas</div>';
-    picked[m].forEach(r => {
+  btn.innerHTML = '<span class="spinner"></span> Getting suggestions...';
+  btn.disabled = true;
+
+  const prompt = 'Generate 1 breakfast and 1 dinner recipe for a vegetarian home cook. Profile: eggs OK, no meat, no refined sugar (jaggery/dates/honey OK), Indian-rooted but open to global, cooks fresh daily under 30 mins. Be creative. Return JSON only: {"suggestions":[{"meal":"Breakfast","name":"recipe name","emoji":"single emoji","time":15,"reason":"one short sentence"},{"meal":"Dinner","name":"recipe name","emoji":"single emoji","time":25,"reason":"one short sentence"}]}';
+
+  try {
+    const data = parseAIJson(await callAI(prompt, 400));
+    const suggestions = data.suggestions || [];
+    if (!suggestions.length) throw new Error('empty');
+
+    let html = '<div class="ai-tip">✨ <strong>AI suggestions for ' + DAYS[selectedDay] + '</strong></div>';
+    suggestions.forEach(s => {
       const idx = aiSuggestions.length;
-      aiSuggestions.push({r, type: m.charAt(0).toUpperCase() + m.slice(1)});
+      const entry = { r: { id: 'ai_' + Date.now() + idx, name: s.name, emoji: s.emoji || '🍽', time: s.time || 25, type: s.meal, tags: [], ingredients: [], steps: [], source: 'ai', board: null }, type: s.meal, reason: s.reason };
+      aiSuggestions.push(entry);
       html += '<div class="ai-card">' +
-        '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">' +
-          '<span style="font-size:20px">' + (r.emoji || '🍽') + '</span>' +
-          '<strong style="font-size:13px">' + r.name + '</strong>' +
-          '<span style="font-size:11px;color:var(--text-muted);margin-left:auto">⏱ ' + r.time + 'm</span>' +
+        '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">' +
+          '<span style="font-size:20px">' + (s.emoji || '🍽') + '</span>' +
+          '<div><strong style="font-size:13px">' + s.name + '</strong>' +
+          '<div style="font-size:10px;color:var(--text-muted)">' + s.meal + ' · ⏱ ' + (s.time || 25) + 'm</div></div>' +
         '</div>' +
-        '<div style="margin-top:5px;display:flex;gap:3px">' + (r.tags || []).slice(0,3).map(t => '<span class="recipe-tag">' + t + '</span>').join('') + '</div>' +
-        '<button class="btn btn-primary btn-sm btn-full" style="margin-top:9px" onclick="addAiRecipeStored(' + idx + ',&quot;' + m.charAt(0).toUpperCase() + m.slice(1) + '&quot;)">+ Plan for ' + DAYS[selectedDay] + '</button>' +
+        (s.reason ? '<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;line-height:1.4">' + s.reason + '</div>' : '') +
+        '<button class="btn btn-primary btn-sm btn-full" onclick="addAiRecipeStored(' + idx + ',\'' + s.meal + '\')">+ Plan for ' + DAYS[selectedDay] + '</button>' +
       '</div>';
     });
-  });
-  document.getElementById('suggestions-content').innerHTML = html;
-  btn.textContent = '🔀 Shuffle';
-  btn.disabled = false;
+    document.getElementById('suggestions-content').innerHTML = html;
+    btn.textContent = '🔀 New suggestions';
+    btn.disabled = false;
+  } catch(e) {
+    if (e.isRateLimit) {
+      document.getElementById('suggestions-content').innerHTML =
+        '<div class="ai-tip" style="background:#FEF8EE;border-color:#F0C96A;text-align:center">' +
+        '⏱ <strong>Too many requests</strong><br/><span style="font-size:11px;color:var(--text-muted)">Gemini free tier allows 15 requests/min.<br/>Wait a moment and try again.</span></div>';
+      btn.textContent = '🔄 Try again';
+      btn.disabled = false;
+      return;
+    }
+    const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+    const bfast = shuffle(recipes.filter(r => r.type === 'Breakfast' || r.type === 'Both'))[0];
+    const dinner = shuffle(recipes.filter(r => r.type === 'Dinner' || r.type === 'Both'))[0];
+    let html = '<div class="ai-tip">💡 AI unavailable — from your vault</div>';
+    [{ r: bfast, type: 'Breakfast' }, { r: dinner, type: 'Dinner' }].filter(e => e.r).forEach(entry => {
+      const idx = aiSuggestions.length;
+      aiSuggestions.push(entry);
+      html += '<div class="ai-card">' +
+        '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">' +
+          '<span style="font-size:20px">' + (entry.r.emoji || '🍽') + '</span>' +
+          '<div><strong style="font-size:13px">' + entry.r.name + '</strong>' +
+          '<div style="font-size:10px;color:var(--text-muted)">' + entry.type + ' · ⏱ ' + entry.r.time + 'm</div></div>' +
+        '</div>' +
+        '<button class="btn btn-primary btn-sm btn-full" onclick="addAiRecipeStored(' + idx + ',\'' + entry.type + '\')">+ Plan for ' + DAYS[selectedDay] + '</button>' +
+      '</div>';
+    });
+    document.getElementById('suggestions-content').innerHTML = html;
+    btn.textContent = '🔀 New suggestions';
+    btn.disabled = false;
+  }
 }
 
 async function addAiRecipe(r, type) {
@@ -983,10 +1029,14 @@ async function analyseNutrition() {
   try {
     const nutPrompt = 'Estimate nutrition for these vegetarian meals (no sugar, solo): ' + meals.map(m => m.day + ' ' + m.meal + ': ' + m.name).join(', ') + '. Per-day averages. JSON only: {"protein_g":45,"carbs_g":180,"fat_g":35,"calories":1400,"balance_note":"...","days":[{"day":"Mon","protein":40,"carbs":170,"fat":30,"calories":1300}]}';
     const rawText2 = await callAI(nutPrompt, 1200);
-    renderNutrition(parseAIJson(rawText2));
+    const nutData = parseAIJson(rawText2);
+    renderNutrition(nutData);
+    localStorage.setItem('rv_nut_' + getWeekStart(), JSON.stringify(nutData));
     btn.textContent = '🔄 Refresh';
   } catch(e) {
-    renderNutrition(estimateNutritionLocally(meals));
+    const nutData = estimateNutritionLocally(meals);
+    renderNutrition(nutData);
+    localStorage.setItem('rv_nut_' + getWeekStart(), JSON.stringify(nutData));
     btn.textContent = '🔄 Refresh';
   }
   btn.disabled = false;
@@ -1089,8 +1139,8 @@ async function generatePrepTimeline() {
   } catch(e) {
     parsed = buildPrepTimelineLocally(meals);
   }
-  const html = renderPrepHtml(parsed);
-  document.getElementById('prep-timeline-content').innerHTML = html;
+  document.getElementById('prep-timeline-content').innerHTML = renderPrepHtml(parsed);
+  localStorage.setItem('rv_prep_' + getWeekStart(), JSON.stringify(parsed));
   if (parsed.tips && parsed.tips[0]) {
     document.getElementById('prep-tip-banner').querySelector('.prep-banner-text').innerHTML = '<strong>Tip:</strong> ' + parsed.tips[0].title + ' — ' + parsed.tips[0].detail;
   }
@@ -1138,7 +1188,8 @@ function renderRecipes(q) {
   else if (activeFilter === 'Snack') filtered = filtered.filter(r => r.type === 'Snack');
   else if (activeFilter === 'Dessert') filtered = filtered.filter(r => r.type === 'Dessert');
   else if (activeFilter === 'Salad') filtered = filtered.filter(r => r.type === 'Salad');
-  else if (activeFilter === 'pinterest') filtered = filtered.filter(r => r.source === 'pinterest');
+  else if (activeFilter === 'Soup') filtered = filtered.filter(r => r.board === 'Soups');
+  else if (activeFilter === 'Dip') filtered = filtered.filter(r => r.board === 'Dips & Dressings');
   document.getElementById('recipe-count').textContent = recipes.length;
   const times = recipes.map(r => r.time).filter(Boolean);
   document.getElementById('avg-time').textContent = times.length ? Math.round(times.reduce((a,b) => a+b, 0) / times.length) + 'm' : '—';
@@ -1484,6 +1535,8 @@ async function saveSmartPlan() {
     }
   }
 
+  localStorage.removeItem('rv_nut_' + getWeekStart());
+  localStorage.removeItem('rv_prep_' + getWeekStart());
   closeModal('smart-plan-modal');
   renderWeekGrid();
   renderMealSlots();
@@ -1609,7 +1662,11 @@ async function callAI(prompt, maxTokens) {
       body: JSON.stringify({ prompt, maxTokens: maxTokens || 1200 })
     });
     const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    if (data.error) {
+      const err = new Error(data.error);
+      if (data.error.includes('429') || data.error.toLowerCase().includes('quota') || data.error.toLowerCase().includes('exhausted')) err.isRateLimit = true;
+      throw err;
+    }
     return data.text;
   } else {
     // Production (GitHub Pages / phone): call Gemini directly
@@ -1623,7 +1680,9 @@ async function callAI(prompt, maxTokens) {
     });
     if (!res.ok) {
       const e = await res.json().catch(() => ({}));
-      throw new Error(e.error?.message || 'Gemini error ' + res.status);
+      const err = new Error(e.error?.message || 'Gemini error ' + res.status);
+      if (res.status === 429) err.isRateLimit = true;
+      throw err;
     }
     const data = await res.json();
     let text = data.candidates[0].content.parts[0].text;

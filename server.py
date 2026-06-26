@@ -3,8 +3,28 @@ import re, json as _json
 from pathlib import Path
 
 PORT = 8080
-GEMINI_KEY = "YOUR_GEMINI_KEY_HERE"  # replace with your actual key when running locally
+
+def load_env():
+    env = {}
+    env_file = Path(__file__).parent / '.env'
+    if env_file.exists():
+        for line in env_file.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                k, v = line.split('=', 1)
+                env[k.strip()] = v.strip()
+    return env
+
+ENV = load_env()
+GEMINI_KEY = ENV.get('GEMINI_KEY', '')
+SUPABASE_URL = ENV.get('SUPABASE_URL', '')
+SUPABASE_KEY = ENV.get('SUPABASE_KEY', '')
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+
+if not GEMINI_KEY:
+    print("WARNING: GEMINI_KEY not found in .env")
+if not SUPABASE_URL:
+    print("WARNING: SUPABASE_URL not found in .env")
 
 class H(http.server.SimpleHTTPRequestHandler):
     def log_message(self, f, *a): print(" ", a[0], a[1])
@@ -27,8 +47,23 @@ class H(http.server.SimpleHTTPRequestHandler):
             p = self.path.split("?")[0]
             if p in ("/", ""): p = "/index.html"
             fp = self.translate_path(p)
+
+            if Path(fp).name == "index.html":
+                data = Path(fp).read_text(encoding="utf-8")
+                data = data.replace("__GEMINI_KEY__", GEMINI_KEY)
+                data = data.replace("__SUPABASE_URL__", SUPABASE_URL)
+                data = data.replace("__SUPABASE_KEY__", SUPABASE_KEY)
+                data = data.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", str(len(data)))
+                self.cors()
+                self.end_headers()
+                self.wfile.write(data)
+                return
+
             data = open(fp, "rb").read()
-            mime = {".html":"text/html",".js":"text/javascript",".css":"text/css"}.get(Path(fp).suffix, "application/octet-stream")
+            mime = {".html":"text/html",".js":"text/javascript",".css":"text/css",".json":"application/json",".png":"image/png"}.get(Path(fp).suffix, "application/octet-stream")
             self.send_response(200)
             self.send_header("Content-Type", mime)
             self.send_header("Content-Length", str(len(data)))
@@ -68,7 +103,6 @@ class H(http.server.SimpleHTTPRequestHandler):
                 with urllib.request.urlopen(req, timeout=60) as r:
                     resp = json.loads(r.read())
 
-               
                 text = resp["candidates"][0]["content"]["parts"][0]["text"]
                 text = re.sub(r'^\s*```(?:json)?\s*', '', text)
                 text = re.sub(r'\s*```\s*$', '', text)
