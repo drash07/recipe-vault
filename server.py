@@ -82,7 +82,27 @@ class H(http.server.SimpleHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", 0))
             body_raw = self.rfile.read(length)
 
-            if self.path == "/api/ai":
+            if self.path == "/api/fetch-url":
+                req_data = json.loads(body_raw)
+                url = req_data.get("url", "")
+                if not url.startswith("http"):
+                    self._json(400, {"error": "Invalid URL"}); return
+                try:
+                    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                    with urllib.request.urlopen(req, timeout=15) as r:
+                        raw = r.read().decode("utf-8", errors="ignore")
+                    # Strip script/style tags and HTML tags
+                    raw = re.sub(r'<(script|style)[^>]*>.*?</(script|style)>', ' ', raw, flags=re.DOTALL|re.IGNORECASE)
+                    raw = re.sub(r'<[^>]+>', ' ', raw)
+                    raw = re.sub(r'[ \t]+', ' ', raw)
+                    raw = re.sub(r'\n{3,}', '\n\n', raw).strip()
+                    print(f"  Fetched URL: {url[:60]} ({len(raw)} chars)")
+                    self._json(200, {"text": raw[:8000]})
+                except Exception as ex:
+                    print(f"  Fetch error: {ex}")
+                    self._json(500, {"error": str(ex)})
+
+            elif self.path == "/api/ai":
                 req_data = json.loads(body_raw)
                 prompt = req_data.get("prompt", "")
                 max_tokens = req_data.get("maxTokens", 1200)

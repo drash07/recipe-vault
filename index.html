@@ -127,9 +127,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .import-banner{background:var(--leaf-light);border:1px solid #A8D5BE;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;display:flex;gap:8px;align-items:center}
 .dog-card{background:#FFF5F5;border:1px solid #F5C0C0;border-radius:var(--radius-sm);padding:11px;margin-bottom:8px}
 .source-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;border-radius:20px;padding:1px 7px;font-weight:500}
-.src-pinterest{background:#FCE8EE;color:#A0294A}
+.src-pinterest{display:inline-flex;align-items:center;padding:1px 5px;border-radius:20px;background:#E60023;}
+.src-instagram{display:inline-flex;align-items:center;padding:1px 5px;border-radius:20px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);}
 .src-ai{background:var(--saffron-light);color:var(--saffron-dark)}
 .src-manual{background:var(--leaf-light);color:var(--leaf)}
+.src-instagram{display:inline-flex;align-items:center;padding:1px 5px;border-radius:20px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);}
 </style>
 </head>
 <body>
@@ -186,10 +188,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
     <button class="filter-chip" onclick="setFilter('Dinner',this)">🌙 Dinner</button>
     <button class="filter-chip" onclick="setFilter('Breakfast',this)">🌅 Breakfast</button>
-    <button class="filter-chip" onclick="setFilter('Snack',this)">🫙 Snacks</button>
+    <button class="filter-chip" onclick="setFilter('Snack',this)">🍿 Snacks</button>
     <button class="filter-chip" onclick="setFilter('Dessert',this)">🍮 Desserts</button>
     <button class="filter-chip" onclick="setFilter('Salad',this)">🥗 Salads</button>
     <button class="filter-chip" onclick="setFilter('Soup',this)">🍲 Soups</button>
+    <button class="filter-chip" onclick="setFilter('Sauce',this)">🌿 Sauces & Chutneys</button>
     <button class="filter-chip" onclick="setFilter('Dip',this)">🫙 Dips & Dressings</button>
   </div>
   <div id="recipes-list"></div>
@@ -215,18 +218,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px"><span class="chip-green">🌿 Vegetarian</span><span class="chip">🥚 Eggs OK</span><span class="chip-yellow">🍯 No sugar</span></div>
     <div style="display:flex;gap:5px;flex-wrap:wrap"><span class="chip">👤 Solo (+ partner sometimes)</span><span class="chip">🐾 Dog meals</span></div>
   </div>
-  <div class="import-banner"><span style="font-size:20px">📌</span><div><div style="font-size:13px;font-weight:500;color:var(--leaf)">76 recipes — all with full steps!</div><div style="font-size:11px;color:var(--text-muted)">Main Course · Breakfast · Small Bites · Sweet Tooth · Salads · Dips · Soups</div></div></div>
-  <div class="section-label">Import from URL</div>
+  <div class="import-banner"><div><div style="font-size:13px;font-weight:500;color:var(--leaf)">76 recipes — all with full steps!</div><div style="font-size:11px;color:var(--text-muted)">Main Course · Breakfast · Small Bites · Sweet Tooth · Salads · Dips · Soups</div></div></div>
+  <div class="section-label">📋 Paste a Recipe</div>
   <div class="card-sm">
-    <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Paste any public recipe link — AI reads & extracts everything automatically.</div>
-    <input class="input" placeholder="https://..." id="url-import-input" style="margin-bottom:8px"/>
-    <button class="btn btn-primary btn-sm btn-full" id="url-import-btn" onclick="importFromUrl()">🔗 Import from URL</button>
-  </div>
-  <div class="section-label">📸 Paste from Instagram</div>
-  <div class="card-sm">
-    <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Open an Instagram saved post → copy the caption or comment → paste below. AI extracts the recipe.</div>
-    <textarea class="input" id="paste-import-input" rows="5" placeholder="Paste recipe caption or comment here..." style="resize:none;margin-bottom:8px"></textarea>
-    <button class="btn btn-primary btn-sm btn-full" id="paste-import-btn" onclick="importFromPaste()">📋 Parse recipe</button>
+    <div id="paste-step-1">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Copy any recipe text — from Instagram, YouTube, a blog, anywhere — paste it here.</div>
+      <textarea class="input" id="paste-import-input" rows="5" placeholder="Paste recipe text here..." style="resize:none;margin-bottom:8px"></textarea>
+      <button class="btn btn-primary btn-sm btn-full" onclick="parseAndShowForm()">→ Continue</button>
+    </div>
+    <div id="paste-step-2" style="display:none">
+      <div class="input-group"><label class="input-label">Recipe name *</label><input class="input" id="paste-name" placeholder="e.g. Palak Paneer"/></div>
+      <div style="display:flex;gap:8px">
+        <div class="input-group" style="flex:1"><label class="input-label">Category *</label>
+          <select class="input" id="paste-type">
+            <option value="Dinner">🌙 Dinner</option>
+            <option value="Breakfast">🌅 Breakfast</option>
+            <option value="Snack">🍿 Snack</option>
+            <option value="Dessert">🍮 Dessert</option>
+            <option value="Salad">🥗 Salad</option>
+            <option value="Soup">🍲 Soup</option>
+            <option value="Sauce">🌿 Sauce & Chutney</option>
+            <option value="Dip">🫙 Dip & Dressing</option>
+          </select>
+        </div>
+        <div class="input-group" style="flex:1"><label class="input-label">Time (mins)</label><input class="input" id="paste-time" type="number" placeholder="30"/></div>
+      </div>
+      <div class="input-group"><label class="input-label">Ingredients * <span style="font-weight:400;color:var(--text-muted)">(one per line)</span></label><textarea class="input" id="paste-ingredients" rows="5" style="resize:none" placeholder="1 cup spinach&#10;200g paneer&#10;..."></textarea></div>
+      <div class="input-group"><label class="input-label">Steps * <span style="font-weight:400;color:var(--text-muted)">(one per line)</span></label><textarea class="input" id="paste-steps" rows="5" style="resize:none" placeholder="Heat oil in pan&#10;Add onions..."></textarea></div>
+      <div style="display:flex;gap:7px;margin-top:4px">
+        <button class="btn btn-outline btn-sm" onclick="resetPasteForm()" style="flex:1">← Back</button>
+        <button class="btn btn-primary btn-sm" onclick="savePastedRecipe()" style="flex:2">Save to Vault</button>
+      </div>
+    </div>
   </div>
   <div class="section-label">🐾 Dog meal ideas</div>
   <div class="dog-card"><div style="font-size:12px;font-weight:500;margin-bottom:5px">Safe, simple dog meals</div><div style="font-size:11px;color:var(--text-muted)">Rice + boiled egg · Sweet potato mash · Plain yogurt · Paneer & peas (no spice, no onion/garlic)</div></div>
@@ -540,6 +563,7 @@ function navigate(screen, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('screen-' + screen).classList.add('active');
   el.classList.add('active');
+  localStorage.setItem('rv_active_screen', screen);
   if (screen === 'recipes') renderRecipes();
   if (screen === 'grocery') { loadGroceries(); }
 }
@@ -641,7 +665,7 @@ function renderMealSlots() {
         '<div class="meal-info">' +
           '<div class="meal-type">' + m.charAt(0).toUpperCase() + m.slice(1) + '</div>' +
           '<div class="meal-name">' + meal.name + '</div>' +
-          '<div class="meal-meta">⏱ ' + meal.time + ' mins' + (meal.source === 'pinterest' ? ' · 📌' : '') + '</div>' +
+          '<div class="meal-meta">⏱ ' + meal.time + ' mins</div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0" onclick="event.stopPropagation()">' +
           '<button onclick="pickMeal(\'' + m + '\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 7px;cursor:pointer;font-size:13px" title="Change recipe">✏️</button>' +
@@ -685,7 +709,9 @@ function _renderPickList(type, query) {
   const q = (query || '').trim();
   const suitable = _suitableRecipes(type, q);
   const cardsHtml = suitable.map(r => {
-    const badge = r.source === 'pinterest' ? '<span class="source-badge src-pinterest">📌</span>' :
+    const igSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>';
+    const ptSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>';
+    const badge = r.source === 'pinterest' ? '<span class="source-badge src-pinterest">' + ptSvg + '</span>' : r.source === 'instagram' ? '<span class="source-badge src-instagram">' + igSvg + '</span>' :
                   r.source === 'ai' ? '<span class="source-badge src-ai">✨</span>' : '';
     return '<div class="recipe-card" onclick="assignMeal(' + r.id + ')">' +
       '<div class="recipe-emoji">' + (r.emoji || '🍽') + '</div>' +
@@ -1163,7 +1189,7 @@ function showRecipeDetail(id) {
   const steps = (r.steps && r.steps.length)
     ? '<div class="section-label">Steps</div>' + r.steps.map((s, i) => '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div class="step-text">' + s + '</div></div>').join('')
     : '';
-  const srcLabel = { pinterest: '📌 From your Pinterest' + (r.board ? ' (' + r.board + ')' : ''), ai: '✨ AI suggested', default: '📖 Starter recipe', manual: '✏️ Added manually', url: '🔗 Imported from URL' };
+  const srcLabel = { pinterest: r.board || '', instagram: r.board || '', ai: '✨ AI suggested', default: '📖 Starter recipe', manual: '✏️ Added manually', url: '🔗 Imported from URL' };
   document.getElementById('recipe-detail-content').innerHTML =
     '<div style="display:flex;align-items:center;gap:11px;margin-bottom:14px">' +
       '<span style="font-size:40px">' + (r.emoji || '🍽') + '</span>' +
@@ -1195,11 +1221,14 @@ function renderRecipes(q) {
   else if (activeFilter === 'Dessert') filtered = filtered.filter(r => r.type === 'Dessert');
   else if (activeFilter === 'Salad') filtered = filtered.filter(r => r.type === 'Salad');
   else if (activeFilter === 'Soup') filtered = filtered.filter(r => r.board === 'Soups');
+  else if (activeFilter === 'Sauce') filtered = filtered.filter(r => r.board === 'Sauce & Chutneys');
   else if (activeFilter === 'Dip') filtered = filtered.filter(r => r.board === 'Dips & Dressings');
   document.getElementById('recipe-count').textContent = recipes.length;
   const times = recipes.map(r => r.time).filter(Boolean);
   document.getElementById('avg-time').textContent = times.length ? Math.round(times.reduce((a,b) => a+b, 0) / times.length) + 'm' : '—';
-  const srcBadge = { pinterest: '<span class="source-badge src-pinterest">📌</span>', ai: '<span class="source-badge src-ai">✨</span>', manual: '<span class="source-badge src-manual">✏️</span>' };
+  const _igSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>';
+  const _ptSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>';
+  const srcBadge = { pinterest: '<span class="source-badge src-pinterest">' + _ptSvg + '</span>', instagram: '<span class="source-badge src-instagram">' + _igSvg + '</span>', ai: '<span class="source-badge src-ai">✨</span>', manual: '<span class="source-badge src-manual">✏️</span>' };
   list.innerHTML = filtered.map(r =>
     '<div class="recipe-card fade-in" onclick="showRecipeDetail(' + r.id + ')">' +
       '<div class="recipe-emoji">' + (r.emoji || '🍽') + '</div>' +
@@ -1244,7 +1273,11 @@ async function importFromUrl() {
   btn.innerHTML = '<span class="spinner"></span> Reading...';
   btn.disabled = true;
   try {
-        const importPrompt = 'Extract the recipe from this URL: ' + url + '. Respond ONLY in JSON (no markdown): {"name":"","time":25,"type":"Dinner","emoji":"\uD83C\uDF5B","ingredients":[],"steps":[],"tags":[],"sourceUrl":"' + url + '"}. If no recipe found: {"error":"No recipe found"}';
+        const fetchRes = await fetch('/api/fetch-url', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({url}) });
+    if (!fetchRes.ok) throw new Error('Could not fetch URL');
+    const fetchData = await fetchRes.json();
+    if (fetchData.error) throw new Error(fetchData.error);
+    const importPrompt = 'Extract the recipe from this web page content. Respond ONLY in JSON (no markdown): {"name":"","time":25,"type":"Dinner","emoji":"\uD83C\uDF7D","ingredients":["qty ingredient"],"steps":["step"],"tags":[],"sourceUrl":"' + url + '"}. type must be one of: Dinner, Breakfast, Snack, Dessert, Salad. If no recipe found: {"error":"No recipe found"}.\n\nPage content:\n' + fetchData.text;
     const text = await callAI(importPrompt, 1500);
     const parsed = parseAIJson(text);
     if (parsed.error) { btn.textContent = '🔗 Import from URL'; btn.disabled = false; alert('No recipe found on that page.'); return; }
@@ -1271,39 +1304,128 @@ async function importFromUrl() {
   }
 }
 
-async function importFromPaste() {
+function parseRecipeText(text) {
+  // Remove emojis and control chars, keep Latin/punctuation
+  const clean  = s => s.replace(/[^\x00-\x7FÀ-ɏ]/g, '').replace(/\s+/g, ' ').trim();
+  // Title-case a string (handles ALL CAPS)
+  const toTitle = s => s === s.toUpperCase()
+    ? s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
+    : s;
+  // Strip bullet / number prefixes
+  const stripBullet = s => s.replace(/^[-•*✅▢☐✓]\s*/, '').replace(/^\d+[.)]\s*/, '').trim();
+  // Skip noise lines: hashtags, handles, URLs, empty
+  const isNoise = s => !s || /^#\S|^@\S|^https?:\/\/|^www\./i.test(s.trim());
+  // Remove "for serving", "to serve", "for garnish" suffix noise
+  const cleanIng = s => clean(s).replace(/\s*(for serving|to serve|for garnish|as needed)\s*$/i, '').trim();
+
+  // Find section keywords anywhere (works even if preceded by emoji)
+  const ingM  = text.match(/ingredients?\s*:?/i);
+  const stepM = text.match(/steps?\s*:|instructions?\s*:|method\s*:|directions?\s*:/i);
+
+  let title = '', ingredients = [], steps = [];
+
+  if (ingM) {
+    // Title = first meaningful line before INGREDIENTS keyword
+    const beforeIng = text.slice(0, ingM.index).split('\n').map(l => clean(l)).filter(l => l && !isNoise(l));
+    title = toTitle(beforeIng[0] || '').replace(/!+$/, '').trim();
+
+    // Ingredients block
+    const ingStart = ingM.index + ingM[0].length;
+    const ingEnd   = stepM ? stepM.index : text.length;
+    const ingRaw   = text.slice(ingStart, ingEnd).replace(/^[\s:]+/, '').trim();
+
+    // Try newline-split first, then comma-split
+    const byLine = ingRaw.split('\n').map(l => cleanIng(stripBullet(l))).filter(l => l.length > 1 && !isNoise(l));
+    ingredients = byLine.length > 1
+      ? byLine
+      : ingRaw.split(',').map(l => cleanIng(stripBullet(l))).filter(l => l.length > 1);
+
+    // Steps block
+    if (stepM) {
+      const stepStart = stepM.index + stepM[0].length;
+      const stepRaw   = text.slice(stepStart).replace(/^[\s:]+/, '').trim();
+
+      // Try newline-split first, then bullet-split
+      const byStepLine = stepRaw.split('\n')
+        .map(l => clean(stripBullet(l)).replace(/^tip\s*[:\-–]?\s*/i, ''))
+        .filter(l => l.length > 5 && !isNoise(l));
+
+      steps = byStepLine.length > 1
+        ? byStepLine
+        : stepRaw.split('•')
+            .map(l => clean(stripBullet(l)).replace(/^tip\s*[:\-–]?\s*/i, ''))
+            .filter(l => l.length > 5);
+    }
+  } else {
+    // No section headers — line-by-line fallback
+    const lines = text.split('\n').map(l => clean(l)).filter(l => l && !isNoise(l));
+    title = toTitle(lines[0] || '').replace(/!+$/, '').trim();
+    const firstStep = lines.findIndex((l, i) => i > 0 && /^1[.)]\s/.test(l));
+    if (firstStep > 0) {
+      ingredients = lines.slice(1, firstStep).map(stripBullet);
+      steps       = lines.slice(firstStep).map(l => stripBullet(l).replace(/^tip\s*[:\-–]?\s*/i, ''));
+    } else {
+      ingredients = lines.slice(1).map(stripBullet);
+    }
+  }
+
+  return {
+    title,
+    ingredients: ingredients.filter(Boolean),
+    steps: steps.filter(Boolean)
+  };
+}
+
+function parseAndShowForm() {
   const text = document.getElementById('paste-import-input').value.trim();
-  if (text.length < 20) { showError('Paste the recipe text first.'); return; }
-  const btn = document.getElementById('paste-import-btn');
-  btn.innerHTML = '<span class="spinner"></span> Parsing...';
-  btn.disabled = true;
-  try {
-    const prompt = 'Extract the recipe from this Instagram caption or comment. Return ONLY JSON, no markdown: {"name":"","time":25,"type":"Dinner","emoji":"🍛","ingredients":["qty ingredient"],"steps":["Step 1"],"tags":["tag"]}. type must be one of: Dinner, Breakfast, Snack, Dessert, Salad, Both. If no recipe: {"error":"No recipe found"}.\n\nText:\n' + text.slice(0, 3000);
-    const parsed = parseAIJson(await callAI(prompt, 1200));
-    if (parsed.error) { btn.textContent = '📋 Parse recipe'; btn.disabled = false; showError('No recipe found in that text — try pasting more of the caption.'); return; }
-    pendingImport = Object.assign({ _fromPaste: true }, parsed);
-    const stepsHtml = parsed.steps && parsed.steps.length
-      ? '<div class="section-label" style="margin-top:10px">Steps</div>' + parsed.steps.map((s,i) => '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div class="step-text">' + s + '</div></div>').join('')
-      : '';
-    document.getElementById('url-preview-content').innerHTML =
-      '<div style="background:var(--leaf-light);border:1px solid #A8D5BE;border-radius:var(--radius);padding:14px;margin-bottom:10px">' +
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
-          '<span style="font-size:30px">' + (parsed.emoji || '🍽') + '</span>' +
-          '<div><div style="font-family:Playfair Display,serif;font-size:16px;font-weight:600">' + parsed.name + '</div>' +
-          '<div style="font-size:11px;color:var(--text-muted)">⏱ ' + parsed.time + ' mins · ' + parsed.type + '</div></div>' +
-        '</div>' +
-        '<div style="font-size:11px;margin-bottom:5px;font-weight:500;color:var(--text-muted)">Ingredients</div>' +
-        '<div style="font-size:12px;line-height:1.9">' + (parsed.ingredients || []).map(i => '• ' + i).join('<br/>') + '</div>' +
-        stepsHtml +
-      '</div>';
-    document.getElementById('url-preview-modal').classList.add('open');
-    btn.textContent = '📋 Parse recipe';
-    btn.disabled = false;
-  } catch(e) {
-    btn.textContent = '📋 Parse recipe';
-    btn.disabled = false;
-    if (e.isRateLimit) { showError('Rate limit — wait a moment and try again.'); return; }
-    showError('Could not parse the recipe. Try again.');
+  if (text.length < 10) { showError('Paste some recipe text first.'); return; }
+  const p = parseRecipeText(text);
+  document.getElementById('paste-name').value = p.title;
+  document.getElementById('paste-ingredients').value = p.ingredients.join('\n');
+  document.getElementById('paste-steps').value = p.steps.join('\n');
+  document.getElementById('paste-time').value = '';
+  document.getElementById('paste-step-1').style.display = 'none';
+  document.getElementById('paste-step-2').style.display = 'block';
+}
+
+function resetPasteForm() {
+  document.getElementById('paste-step-1').style.display = 'block';
+  document.getElementById('paste-step-2').style.display = 'none';
+}
+
+async function savePastedRecipe() {
+  const name = document.getElementById('paste-name').value.trim();
+  const ingredients = document.getElementById('paste-ingredients').value.trim().split('\n').map(l => l.trim()).filter(Boolean);
+  const steps = document.getElementById('paste-steps').value.trim().split('\n').map(l => l.trim()).filter(Boolean);
+  if (!name) { showError('Recipe name is required.'); return; }
+  if (!ingredients.length) { showError('Add at least one ingredient.'); return; }
+  if (!steps.length) { showError('Add at least one step.'); return; }
+  const catVal = document.getElementById('paste-type').value;
+  const boardMap = { Soup: { type: 'Snack', board: 'Soups' }, Sauce: { type: 'Snack', board: 'Sauce & Chutneys' }, Dip: { type: 'Snack', board: 'Dips & Dressings' } };
+  const { type, board } = boardMap[catVal] || { type: catVal, board: null };
+  const emojiMap = { Dinner: '🌙', Breakfast: '🌅', Snack: '🍿', Dessert: '🍮', Salad: '🥗', Soup: '🍲', Sauce: '🌿', Dip: '🫙' };
+  const recipe = {
+    id: Date.now(),
+    name,
+    type,
+    board,
+    time: parseInt(document.getElementById('paste-time').value) || 30,
+    emoji: emojiMap[catVal] || '🍽',
+    ingredients,
+    steps,
+    tags: [],
+    source: 'manual'
+  };
+  const ok = await upsertRecipe(recipe);
+  if (ok) {
+    recipes.push(recipe);
+    renderRecipes();
+    showStatus('Recipe saved!');
+    setTimeout(hideStatus, 2000);
+    document.getElementById('paste-import-input').value = '';
+    resetPasteForm();
+  } else {
+    showError('Could not save recipe. Try again.');
   }
 }
 
@@ -2003,6 +2125,19 @@ async function init() {
   showStatus('✓ Connected to Recipe Vault', 'var(--leaf)');
   setTimeout(hideStatus, 2000);
 }
+
+// Restore last active screen instantly before data loads to avoid flash
+(function() {
+  const s = localStorage.getItem('rv_active_screen');
+  if (s && s !== 'home') {
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const screen = document.getElementById('screen-' + s);
+    const nav = document.querySelector(`.nav-item[onclick*="'${s}'"]`);
+    if (screen) screen.classList.add('active');
+    if (nav) nav.classList.add('active');
+  }
+})();
 
 init();
 </script>
