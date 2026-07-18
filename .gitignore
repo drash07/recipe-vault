@@ -1,6 +1,19 @@
 # Secret keys — never commit these
 .env
 
+# Instagram session (contains login tokens)
+ig_session.json
+metadata/ig_session.json
+
+# Raw Instagram data (large, not needed in repo)
+metadata/ig_posts_raw.json
+
+# Claude Code local config
+.claude/
+
+# Temp Word files
+~$*.docx
+
 # Python
 __pycache__/
 *.pyc

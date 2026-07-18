@@ -26,9 +26,11 @@ jobs:
 
       - name: Inject secrets into index.html
         run: |
-          sed -i "s|__GEMINI_KEY__|${{ secrets.GEMINI_KEY }}|g" index.html
           sed -i "s|__SUPABASE_URL__|${{ secrets.SUPABASE_URL }}|g" index.html
           sed -i "s|__SUPABASE_KEY__|${{ secrets.SUPABASE_KEY }}|g" index.html
+          sed -i "s|__POSTHOG_KEY__|${{ secrets.POSTHOG_KEY }}|g" index.html
+          sed -i "s|__SENTRY_DSN__|${{ secrets.SENTRY_DSN }}|g" index.html
+          sed -i "s|__API_BASE__|${{ secrets.API_BASE }}|g" index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

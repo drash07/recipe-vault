@@ -1,2143 +1,417 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>Recipe Vault – Drashti</title>
+<title>Recipe Vault</title>
 <link rel="manifest" href="manifest.json"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="Recipe Vault"/>
 <meta name="theme-color" content="#E8680A"/>
-<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="apple-touch-icon" href="assets/icon-192.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--saffron:#E8680A;--saffron-light:#FDF0E6;--saffron-dark:#B84E00;--turmeric:#F5A623;--turmeric-light:#FEF8EE;--leaf:#2D7A4F;--leaf-light:#EAF5EE;--berry:#7B4F9E;--berry-light:#F3EEF9;--border:#EAE4DA;--text:#1A1410;--text-muted:#8A7E75;--card:#FFFFFF;--bg:#FDFAF5;--radius:14px;--radius-sm:8px;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:420px;margin:0 auto;padding-bottom:80px;font-size:14px}
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:100;padding:8px 0 12px}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--text-muted);cursor:pointer;padding:4px;transition:color .2s;border:none;background:none}
-.nav-item.active{color:var(--saffron)}
-.nav-icon{font-size:20px}
-.header{padding:16px 16px 10px;background:var(--bg);position:sticky;top:0;z-index:50;border-bottom:1px solid var(--border)}
-.header-top{display:flex;align-items:center;justify-content:space-between}
-.app-title{font-family:Playfair Display,serif;font-size:20px;font-weight:600}
-.subtitle{font-size:11px;color:var(--text-muted);margin-top:1px}
-.avatar{width:34px;height:34px;border-radius:50%;background:var(--saffron);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:500;flex-shrink:0}
-.screen{display:none;padding:12px 14px}
-.screen.active{display:block}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px}
-.card-sm{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;margin-bottom:8px}
-.section-label{font-size:10px;font-weight:600;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin:14px 0 7px}
-.chip{display:inline-flex;align-items:center;gap:3px;background:var(--saffron-light);color:var(--saffron-dark);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:500}
-.chip-green{background:var(--leaf-light);color:var(--leaf);display:inline-flex;align-items:center;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:500}
-.chip-yellow{background:var(--turmeric-light);color:#7A5200;display:inline-flex;align-items:center;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:500}
-.week-grid{display:flex;gap:4px;padding-bottom:4px;scrollbar-width:none;margin-bottom:10px;overflow-x:auto}
-.week-grid::-webkit-scrollbar{display:none}
-.day-pill{flex:1;min-width:40px;border-radius:10px;padding:7px 3px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:1.5px solid var(--border);background:#fff;transition:all .2s}
-.day-pill.active{border-color:var(--saffron);background:var(--saffron-light)}
-.day-pill .day-name{font-size:9px;color:var(--text-muted);font-weight:600;letter-spacing:.04em}
-.day-pill .day-num{font-size:15px;font-weight:500}
-.day-pill.active .day-name,.day-pill.active .day-num{color:var(--saffron-dark)}
-.day-pill .dot{width:5px;height:5px;border-radius:50%;background:var(--border)}
-.day-pill.active .dot,.day-pill.has-meals .dot{background:var(--leaf)}
-.day-pill.today{border-color:var(--turmeric)}
-.day-pill.today .day-name,.day-pill.today .day-num{color:#7A5200}
-.meal-slot{display:flex;align-items:center;gap:10px;padding:11px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:7px;cursor:pointer;transition:border-color .2s}
-.meal-slot:hover{border-color:var(--saffron)}
-.meal-slot.filled{border-color:var(--leaf);background:var(--leaf-light)}
-.meal-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--saffron-light);flex-shrink:0}
-.meal-info{flex:1;min-width:0}
-.meal-type{font-size:9px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-.meal-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meal-meta{font-size:11px;color:var(--text-muted);margin-top:1px}
-.nut-bar-wrap{height:8px;background:#F0EBE3;border-radius:4px;overflow:hidden;margin-bottom:3px}
-.nut-bar{height:100%;border-radius:4px;transition:width .5s}
-.nut-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.nut-label{font-size:12px;color:var(--text-muted);width:60px;flex-shrink:0}
-.nut-val{font-size:11px;font-weight:500;color:var(--text);width:36px;text-align:right;flex-shrink:0}
-.recipe-card{display:flex;gap:11px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:9px;cursor:pointer;transition:border-color .2s}
-.recipe-card:hover{border-color:var(--saffron)}
-.recipe-emoji{width:48px;height:48px;border-radius:9px;background:var(--saffron-light);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.recipe-info{flex:1;min-width:0}
-.recipe-name{font-size:14px;font-weight:500;margin-bottom:2px}
-.recipe-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}
-.recipe-tag{font-size:10px;background:var(--saffron-light);color:var(--saffron-dark);padding:2px 6px;border-radius:8px;font-weight:500}
-.recipe-tag.green{background:var(--leaf-light);color:var(--leaf)}
-.recipe-tag.pink{background:#FCE8EE;color:#A0294A}
-.recipe-meta-row{font-size:11px;color:var(--text-muted);margin-top:2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.grocery-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
-.grocery-item:last-child{border-bottom:none}
-.grocery-check{width:21px;height:21px;border-radius:5px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s}
-.grocery-check.checked{background:var(--leaf);border-color:var(--leaf)}
-.grocery-item-name{flex:1;font-size:13px}
-.grocery-item-name.checked{color:var(--text-muted);text-decoration:line-through}
-.grocery-qty{font-size:12px;color:var(--text-muted);white-space:nowrap}
-.ai-card{background:#FFFBF5;border:1px solid #F0D9B0;border-radius:var(--radius);padding:14px;margin-bottom:9px}
-.ai-badge{font-size:10px;font-weight:600;background:var(--saffron);color:#fff;padding:1px 7px;border-radius:8px}
-.ai-tip{font-size:12px;color:#7A5200;background:#FEF3DC;border-radius:var(--radius-sm);padding:7px 9px;margin-bottom:10px;line-height:1.5}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;font-family:'DM Sans',sans-serif}
-.btn-primary{background:var(--saffron);color:#fff}.btn-primary:hover{background:var(--saffron-dark)}
-.btn-outline{background:#fff;color:var(--text);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--saffron)}
-.btn-leaf{background:var(--leaf);color:#fff}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-berry{background:var(--berry);color:#fff}
-.btn-sm{padding:5px 11px;font-size:12px}
-.btn-full{width:100%}
-.input{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color .2s}
-.input:focus{border-color:var(--saffron)}
-.input-label{font-size:11px;font-weight:500;color:var(--text-muted);margin-bottom:4px;display:block}
-.input-group{margin-bottom:12px}
-.modal-overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:200;align-items:flex-end;justify-content:center;overflow:hidden;visibility:hidden;pointer-events:none;transition:background .25s,visibility 0s .3s}
-.modal-overlay.open{background:rgba(0,0,0,.45);visibility:visible;pointer-events:auto;transition:background .25s,visibility 0s}
-.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:18px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;position:relative;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.23,1)}
-.modal-overlay.open .modal{transform:translateY(0)}
-.modal-handle{width:34px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 14px}
-.modal-title{font-family:Playfair Display,serif;font-size:17px;font-weight:600;margin-bottom:14px;padding-right:32px}
-.modal-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;border:none;background:var(--bg);color:var(--text-muted);font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s}
-.modal-close:hover{background:var(--border)}
-.prep-task{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px}
-.prep-task-name{font-size:13px;font-weight:500}
-.prep-task-detail{font-size:11px;color:var(--text-muted);margin-top:2px;line-height:1.5}
-.prep-task.reuse{border-left:3px solid var(--leaf)}
-.prep-task.batch{border-left:3px solid var(--saffron)}
-.prep-day-header{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin:12px 0 6px;padding-left:20px;position:relative}
-.prep-day-header::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:var(--saffron-light);border:2px solid var(--saffron)}
-.step-item{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
-.step-num{width:22px;height:22px;border-radius:50%;background:var(--saffron);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.step-text{font-size:13px;line-height:1.6;flex:1}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.fade-in{animation:fadeIn .25s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.prep-banner{background:var(--turmeric-light);border:1px solid #F0C96A;border-radius:var(--radius-sm);padding:9px 11px;margin-bottom:10px;display:flex;gap:7px;align-items:flex-start}
-.prep-banner-text{font-size:11px;color:#5C4000;line-height:1.5}
-.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
-.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;text-align:center}
-.stat-num{font-size:20px;font-weight:500;color:var(--saffron)}
-.stat-label{font-size:10px;color:var(--text-muted);margin-top:1px}
-.filter-bar{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin-bottom:10px}
-.filter-bar::-webkit-scrollbar{display:none}
-.filter-chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text-muted);white-space:nowrap;flex-shrink:0;transition:all .2s}
-.filter-chip.active{border-color:var(--saffron);background:var(--saffron-light);color:var(--saffron-dark)}
-.tab-bar{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:14px}
-.tab{flex:1;padding:7px;text-align:center;font-size:12px;font-weight:500;color:var(--text-muted);cursor:pointer;background:#fff;border:none;transition:all .2s}
-.tab.active{background:var(--saffron);color:#fff}
-.import-banner{background:var(--leaf-light);border:1px solid #A8D5BE;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;display:flex;gap:8px;align-items:center}
-.dog-card{background:#FFF5F5;border:1px solid #F5C0C0;border-radius:var(--radius-sm);padding:11px;margin-bottom:8px}
-.source-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;border-radius:20px;padding:1px 7px;font-weight:500}
-.src-pinterest{display:inline-flex;align-items:center;padding:1px 5px;border-radius:20px;background:#E60023;}
-.src-instagram{display:inline-flex;align-items:center;padding:1px 5px;border-radius:20px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);}
-.src-ai{background:var(--saffron-light);color:var(--saffron-dark)}
-.src-manual{background:var(--leaf-light);color:var(--leaf)}
-.src-instagram{display:inline-flex;align-items:center;padding:1px 5px;border-radius:20px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);}
-</style>
+<link rel="stylesheet" href="src/theme/variables.css"/>
+<link rel="stylesheet" href="src/theme/components.css"/>
+<link rel="stylesheet" href="src/theme/app.css"/>
+
+<!-- PostHog analytics -->
+<script>
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}var u=t.createElement("script");u.type="text/javascript",u.async=!0,u.src=s.api_host.replace(".i.posthog.com","").replace("https://","https://us-assets.")+"/static/array.js";var l=t.getElementsByTagName("script")[0];l.parentNode.insertBefore(u,l);var _=e;a&&(a!="undefined"&&typeof a=="object"&&(_=e[a]=[])),_.people=_.people||[],_.toString=function(t){var e="posthog";return a&&a!="posthog"&&(e+="."+a),t||(e+=" (stub)"),e},_.people.toString=function(){return _.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonPropertiesForFlags".split(" "),n=0;n<o.length;n++)g(_,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init('__POSTHOG_KEY__', {api_host: 'https://us.i.posthog.com', person_profiles: 'identified_only'});
+</script>
+
+<!-- Sentry error tracking -->
+<script src="https://cdn.jsdelivr.net/npm/@sentry/browser@7/build/bundle.min.js" crossorigin="anonymous"></script>
+<script>
+if (window.Sentry) Sentry.init({ dsn: '__SENTRY_DSN__', tracesSampleRate: 0 });
+</script>
 </head>
 <body>
-<div class="header">
-  <div class="header-top">
-    <div><div class="app-title">🍲 Recipe Vault</div><div class="subtitle">Drashti's kitchen, planned your way</div></div>
-    <div class="avatar">D</div>
-  </div>
-</div>
-<div class="screen active" id="screen-home">
-  <div class="tab-bar">
-    <button class="tab active" onclick="switchHomeTab('plan',this)">📅 Plan</button>
-    <button class="tab" onclick="switchHomeTab('nutrition',this)">📊 Nutrition</button>
-    <button class="tab" onclick="switchHomeTab('prep',this)">⏱ Prep</button>
-  </div>
-  <div id="home-plan">
-    <div class="prep-banner" id="prep-tip-banner"><span style="font-size:15px">💡</span><div class="prep-banner-text"><strong>Tip:</strong> Plan your week then hit the Prep tab for smart batch-cook suggestions.</div></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <button id="prev-week-btn" onclick="changeWeek(-1)" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;color:var(--text-muted)">← Prev</button>
-      <div id="week-label" style="font-size:12px;font-weight:500;color:var(--text-muted)">This week</div>
-      <button id="next-week-btn" onclick="changeWeek(1)" style="background:none;border:1px solid var(--saffron);border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;color:var(--saffron)">Next →</button>
-    </div>
-    <div class="week-grid" id="week-grid"></div>
-    <div class="section-label" id="selected-day-label">Monday's meals</div>
-    <div id="meal-slots"></div>
-    <button class="btn btn-primary btn-full" style="margin-top:6px" onclick="openSuggestModal()">✨ AI suggestions for this day</button>
-    <button class="btn btn-outline btn-full" style="margin-top:7px" onclick="openSmartPlanModal()">🎲 Auto-plan my next 5 days</button>
-  </div>
-  <div id="home-nutrition" style="display:none">
-    <div class="card">
-      <div style="font-size:13px;font-weight:500;margin-bottom:12px">Weekly nutrition estimate</div>
-      <div class="nut-row"><div class="nut-label">🥦 Protein</div><div style="flex:1"><div class="nut-bar-wrap"><div class="nut-bar" id="bar-protein" style="background:var(--leaf);width:0%"></div></div></div><div class="nut-val" id="val-protein">—</div></div>
-      <div class="nut-row"><div class="nut-label">🌾 Carbs</div><div style="flex:1"><div class="nut-bar-wrap"><div class="nut-bar" id="bar-carbs" style="background:var(--turmeric);width:0%"></div></div></div><div class="nut-val" id="val-carbs">—</div></div>
-      <div class="nut-row"><div class="nut-label">🫒 Fat</div><div style="flex:1"><div class="nut-bar-wrap"><div class="nut-bar" id="bar-fat" style="background:var(--saffron);width:0%"></div></div></div><div class="nut-val" id="val-fat">—</div></div>
-      <div class="nut-row" style="margin-bottom:0"><div class="nut-label">🔥 Calories</div><div style="flex:1"><div class="nut-bar-wrap"><div class="nut-bar" id="bar-cal" style="background:var(--berry);width:0%"></div></div></div><div class="nut-val" id="val-cal">—</div></div>
-      <div style="font-size:10px;color:var(--text-muted);margin-top:10px">Approximate daily averages based on planned meals.</div>
-    </div>
-    <button class="btn btn-berry btn-full" id="nut-btn" onclick="analyseNutrition()">🔍 Analyse this week's meals</button>
-    <div id="nut-breakdown" style="margin-top:10px"></div>
-  </div>
-  <div id="home-prep" style="display:none">
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Smart batch-cook plan — make once, use across multiple meals.</div>
-    <div id="prep-timeline-content"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Plan your meals first, then generate your prep timeline.</div></div>
-    <button class="btn btn-berry btn-full" id="prep-btn" onclick="generatePrepTimeline()">⏱ Generate prep timeline</button>
-  </div>
-</div>
-<div class="screen" id="screen-recipes">
-  <div class="stats-row" style="margin-top:2px">
-    <div class="stat-card"><div class="stat-num" id="recipe-count">0</div><div class="stat-label">saved recipes</div></div>
-    <div class="stat-card"><div class="stat-num" id="avg-time">—</div><div class="stat-label">avg cook time</div></div>
-  </div>
-  <input class="input" placeholder="Search recipes..." oninput="filterRecipes(this.value)" style="margin-bottom:8px"/>
-  <div class="filter-bar">
-    <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
-    <button class="filter-chip" onclick="setFilter('Dinner',this)">🌙 Dinner</button>
-    <button class="filter-chip" onclick="setFilter('Breakfast',this)">🌅 Breakfast</button>
-    <button class="filter-chip" onclick="setFilter('Snack',this)">🍿 Snacks</button>
-    <button class="filter-chip" onclick="setFilter('Dessert',this)">🍮 Desserts</button>
-    <button class="filter-chip" onclick="setFilter('Salad',this)">🥗 Salads</button>
-    <button class="filter-chip" onclick="setFilter('Soup',this)">🍲 Soups</button>
-    <button class="filter-chip" onclick="setFilter('Sauce',this)">🌿 Sauces & Chutneys</button>
-    <button class="filter-chip" onclick="setFilter('Dip',this)">🫙 Dips & Dressings</button>
-  </div>
-  <div id="recipes-list"></div>
-  <div style="display:flex;gap:7px;margin-top:4px">
-    <button class="btn btn-outline btn-full" onclick="openAddModal()">+ Add manually</button>
-    <button class="btn btn-leaf btn-full" onclick="openIngredientsModal()">🥦 Use my ingredients</button>
-  </div>
-</div>
-<div class="screen" id="screen-grocery">
-  <div style="margin-bottom:10px">
-    <div style="font-size:15px;font-weight:500" id="grocery-title">This week's list</div>
-    <div style="font-size:11px;color:var(--text-muted)" id="grocery-summary">0 of 0 items</div>
-  </div>
-  <div class="card"><div id="grocery-list"></div></div>
-  <button class="btn btn-leaf btn-full" style="margin-top:4px" onclick="generateGrocery()">🛒 Regenerate from meal plan</button>
-</div>
-<div class="screen" id="screen-profile">
-  <div class="card" style="margin-top:2px">
-    <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px">
-      <div class="avatar" style="width:46px;height:46px;font-size:17px">D</div>
-      <div><div style="font-weight:500;font-size:15px">Drashti</div><div style="font-size:11px;color:var(--text-muted)">Vegetarian · Eggs OK · No sugar</div></div>
-    </div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px"><span class="chip-green">🌿 Vegetarian</span><span class="chip">🥚 Eggs OK</span><span class="chip-yellow">🍯 No sugar</span></div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap"><span class="chip">👤 Solo (+ partner sometimes)</span><span class="chip">🐾 Dog meals</span></div>
-  </div>
-  <div class="import-banner"><div><div style="font-size:13px;font-weight:500;color:var(--leaf)">76 recipes — all with full steps!</div><div style="font-size:11px;color:var(--text-muted)">Main Course · Breakfast · Small Bites · Sweet Tooth · Salads · Dips · Soups</div></div></div>
-  <div class="section-label">📋 Paste a Recipe</div>
-  <div class="card-sm">
-    <div id="paste-step-1">
-      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Copy any recipe text — from Instagram, YouTube, a blog, anywhere — paste it here.</div>
-      <textarea class="input" id="paste-import-input" rows="5" placeholder="Paste recipe text here..." style="resize:none;margin-bottom:8px"></textarea>
-      <button class="btn btn-primary btn-sm btn-full" onclick="parseAndShowForm()">→ Continue</button>
-    </div>
-    <div id="paste-step-2" style="display:none">
-      <div class="input-group"><label class="input-label">Recipe name *</label><input class="input" id="paste-name" placeholder="e.g. Palak Paneer"/></div>
-      <div style="display:flex;gap:8px">
-        <div class="input-group" style="flex:1"><label class="input-label">Category *</label>
-          <select class="input" id="paste-type">
-            <option value="Dinner">🌙 Dinner</option>
-            <option value="Breakfast">🌅 Breakfast</option>
-            <option value="Snack">🍿 Snack</option>
-            <option value="Dessert">🍮 Dessert</option>
-            <option value="Salad">🥗 Salad</option>
-            <option value="Soup">🍲 Soup</option>
-            <option value="Sauce">🌿 Sauce & Chutney</option>
-            <option value="Dip">🫙 Dip & Dressing</option>
-          </select>
-        </div>
-        <div class="input-group" style="flex:1"><label class="input-label">Time (mins)</label><input class="input" id="paste-time" type="number" placeholder="30"/></div>
+
+<!-- ── LOGIN OVERLAY ──────────────────────────────────────────── -->
+<div id="login-overlay" class="overlay">
+  <div class="overlay-logo">🍲 Recipe Vault</div>
+  <div class="overlay-sub">Your kitchen, your way</div>
+  <div class="overlay-box">
+    <!-- Step 1: email input -->
+    <div id="login-step-1">
+      <div class="overlay-title" id="login-title">Welcome</div>
+      <div class="overlay-hint">Enter your email to sign in or create an account — we'll send you a magic link, no password needed.</div>
+      <div class="input-group">
+        <label class="input-label">Email address</label>
+        <input class="input" id="login-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')sendMagicLink()"/>
       </div>
-      <div class="input-group"><label class="input-label">Ingredients * <span style="font-weight:400;color:var(--text-muted)">(one per line)</span></label><textarea class="input" id="paste-ingredients" rows="5" style="resize:none" placeholder="1 cup spinach&#10;200g paneer&#10;..."></textarea></div>
-      <div class="input-group"><label class="input-label">Steps * <span style="font-weight:400;color:var(--text-muted)">(one per line)</span></label><textarea class="input" id="paste-steps" rows="5" style="resize:none" placeholder="Heat oil in pan&#10;Add onions..."></textarea></div>
-      <div style="display:flex;gap:7px;margin-top:4px">
-        <button class="btn btn-outline btn-sm" onclick="resetPasteForm()" style="flex:1">← Back</button>
-        <button class="btn btn-primary btn-sm" onclick="savePastedRecipe()" style="flex:2">Save to Vault</button>
+      <div id="login-error" style="font-size:12px;color:#C0392B;margin-bottom:10px;min-height:18px"></div>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="sendMagicLink()">Send me a login link</button>
+
+      <!-- TODO: Phone OTP option
+      <div style="text-align:center;font-size:12px;color:var(--text-muted);margin:12px 0">— or —</div>
+      <button class="btn btn-outline btn-full" onclick="showPhoneLogin()">📱 Use phone number instead</button>
+      Requires: Supabase → Auth → Phone → connect Twilio
+      Functions to add in auth.js:
+        sendPhoneOtp(phone)  → db.auth.signInWithOtp({ phone })
+        verifyPhoneOtp(phone, token) → db.auth.verifyOtp({ phone, token, type: 'sms' })
+      -->
+    </div>
+    <!-- Step 2: check inbox -->
+    <div id="login-step-2" style="display:none;text-align:center">
+      <div style="font-size:40px;margin-bottom:12px">✉️</div>
+      <div class="overlay-title" style="text-align:center">Check your inbox</div>
+      <div class="overlay-hint" style="text-align:center">
+        We sent a login link to<br/>
+        <strong id="login-sent-email"></strong><br/>
+        Tap the link in the email to sign in.
       </div>
+      <button class="btn btn-outline btn-full" onclick="resendMagicLink()" style="margin-bottom:8px">← Change email</button>
+      <div style="font-size:11px;color:var(--text-muted);text-align:center">Didn't get it? Check your spam folder.</div>
     </div>
-  </div>
-  <div class="section-label">🐾 Dog meal ideas</div>
-  <div class="dog-card"><div style="font-size:12px;font-weight:500;margin-bottom:5px">Safe, simple dog meals</div><div style="font-size:11px;color:var(--text-muted)">Rice + boiled egg · Sweet potato mash · Plain yogurt · Paneer & peas (no spice, no onion/garlic)</div></div>
-</div>
-<nav class="bottom-nav">
-  <button class="nav-item active" onclick="navigate('home',this)"><span class="nav-icon">📅</span><span>Plan</span></button>
-  <button class="nav-item" onclick="navigate('recipes',this)"><span class="nav-icon">📖</span><span>Recipes</span></button>
-  <button class="nav-item" onclick="navigate('grocery',this)"><span class="nav-icon">🛒</span><span>Grocery</span></button>
-  <button class="nav-item" onclick="navigate('profile',this)"><span class="nav-icon">👤</span><span>Profile</span></button>
-</nav>
-<div class="modal-overlay" id="smart-plan-modal">
-  <div class="modal"><div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeModal('smart-plan-modal')">×</button>
-    <div class="modal-title">🎲 Smart Meal Plan</div>
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Swap any meal to customise, then save.</div>
-    <div id="smart-plan-content"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px"><span class="spinner"></span></div></div>
-    <button class="btn btn-leaf btn-full" id="smart-plan-save-btn" onclick="saveSmartPlan()" style="margin-top:10px;display:none" disabled>✓ Save this plan</button>
-  </div>
-</div>
-<div class="modal-overlay" id="suggest-modal">
-  <div class="modal"><div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeModal('suggest-modal')">×</button>
-    <div class="modal-title">✨ AI Meal Suggestions</div>
-    <div id="suggestions-content"><div style="text-align:center;padding:18px 0;color:var(--text-muted);font-size:13px">Vegetarian · Eggs OK · No sugar · ≤30 mins</div></div>
-    <button class="btn btn-primary btn-full" id="suggest-btn" onclick="getSuggestions()">Get suggestions for this day</button>
-  </div>
-</div>
-<div class="modal-overlay" id="add-modal">
-  <div class="modal"><div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeModal('add-modal')">×</button>
-    <div class="modal-title">Add Recipe</div>
-    <div class="input-group"><label class="input-label">Recipe name</label><input class="input" id="new-name" placeholder="e.g. Palak Tofu"/></div>
-    <div class="input-group"><label class="input-label">Cook time (mins)</label><input class="input" id="new-time" type="number" placeholder="25"/></div>
-    <div class="input-group"><label class="input-label">Meal type</label><select class="input" id="new-type"><option>Dinner</option><option>Breakfast</option><option>Snack</option><option>Dessert</option><option>Salad</option><option>Both</option></select></div>
-    <div class="input-group"><label class="input-label">Ingredients (comma separated)</label><input class="input" id="new-ingredients" placeholder="spinach, tofu, onion"/></div>
-    <div class="input-group"><label class="input-label">Steps (one per line)</label><textarea class="input" id="new-steps" rows="3" placeholder="Step 1&#10;Step 2" style="resize:none"></textarea></div>
-    <button class="btn btn-primary btn-full" onclick="saveNewRecipe()">Save Recipe</button>
-  </div>
-</div>
-<div class="modal-overlay" id="recipe-detail-modal">
-  <div class="modal"><div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeModal('recipe-detail-modal')">×</button>
-    <div id="recipe-detail-content"></div>
-  </div>
-</div>
-<div class="modal-overlay" id="url-preview-modal">
-  <div class="modal"><div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeModal('url-preview-modal')">×</button>
-    <div class="modal-title">Recipe found 🎉</div>
-    <div id="url-preview-content"></div>
-    <button class="btn btn-primary btn-full" onclick="saveImportedRecipe()">Save to Recipe Vault</button>
-  </div>
-</div>
-<div class="modal-overlay" id="ingredients-modal">
-  <div class="modal"><div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeModal('ingredients-modal')">×</button>
-    <div class="modal-title">🥦 What's in your kitchen?</div>
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Enter ingredients you want to use — I'll find matching recipes or create a new one.</div>
-    <div class="input-group">
-      <label class="input-label">Ingredients I have (comma separated)</label>
-      <input class="input" id="ing-input" placeholder="spinach, paneer, tomatoes, cumin..." oninput="clearIngResults()"/>
-    </div>
-    <div style="display:flex;gap:7px;margin-bottom:4px">
-      <button class="btn btn-outline btn-full" onclick="findByIngredients()">🔍 Find in vault</button>
-      <button class="btn btn-primary btn-full" id="gen-recipe-btn" onclick="generateRecipeFromIngredients()">✨ Generate recipe</button>
-    </div>
-    <div id="ing-results" style="margin-top:10px"></div>
   </div>
 </div>
 
+<!-- ── PROFILE SETUP OVERLAY ──────────────────────────────────── -->
+<div id="setup-overlay" class="overlay" style="display:none">
+  <div class="overlay-logo">🍲 Recipe Vault</div>
+  <div class="overlay-sub">Let's set up your kitchen profile</div>
+  <div class="overlay-box">
+    <div id="setup-body"></div>
+    <!-- finish button rendered by wizard when needed -->
+  </div>
+</div>
+
+<!-- ── MAIN APP ────────────────────────────────────────────────── -->
+<div id="app" style="display:none">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="app-title">🍲 Recipe Vault</div>
+        <div class="subtitle" id="header-subtitle">Your kitchen, your way</div>
+      </div>
+      <div class="avatar" id="header-avatar" onclick="navigate('profile',document.querySelector('[onclick*=\'profile\']'))">?</div>
+    </div>
+  </div>
+
+  <!-- ── PLAN TAB ────────────────────────────────────────────── -->
+  <div class="screen active" id="screen-home">
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchHomeTab('plan',this)">📅 Plan</button>
+      <button class="tab" onclick="switchHomeTab('nutrition',this)">📊 Nutrition</button>
+      <button class="tab" onclick="switchHomeTab('prep',this)">⏱ Prep</button>
+    </div>
+
+    <div id="home-plan">
+      <div class="prep-banner" id="prep-tip-banner">
+        <span style="font-size:15px">💡</span>
+        <div class="prep-banner-text"><strong>Tip:</strong> Plan your week then hit the Prep tab for smart batch-cook suggestions.</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <button id="prev-week-btn" onclick="changeWeek(-1)" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;color:var(--text-muted)">← Prev</button>
+        <div id="week-label" style="font-size:12px;font-weight:500;color:var(--text-muted)">This week</div>
+        <button id="next-week-btn" onclick="changeWeek(1)" style="background:none;border:1px solid var(--saffron);border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;color:var(--saffron)">Next →</button>
+      </div>
+      <div class="week-grid" id="week-grid"></div>
+      <div class="section-label" id="selected-day-label">Today's meals</div>
+      <div id="meal-slots"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:6px" onclick="openSuggestModal()">✨ AI suggestions for this day</button>
+      <button class="btn btn-outline btn-full" style="margin-top:7px" onclick="openSmartPlanModal()">🎲 Auto-plan my cook days</button>
+    </div>
+
+    <div id="home-nutrition" style="display:none">
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;margin-bottom:12px">Weekly nutrition estimate</div>
+        <div class="nut-row"><div class="nut-label">🥦 Protein</div><div style="flex:1"><div class="nut-bar-wrap"><div class="nut-bar" id="bar-protein" style="background:var(--leaf);width:0%"></div></div></div><div class="nut-val" id="val-protein">—</div></div>
+        <div class="nut-row"><div class="nut-label">🌾 Carbs</div><div style="flex:1"><div class="nut-bar-wrap"><div class="nut-bar" id="bar-carbs" style="background:var(--turmeric);width:0%"></div></div></div><div class="nut-val" id="val-carbs">—</div></div>
+        <div class="nut-row"><div class="nut-label">🫒 Fat</div><div style="flex:1"><div class="nut-bar-wrap"><div class="nut-bar" id="bar-fat" style="background:var(--saffron);width:0%"></div></div></div><div class="nut-val" id="val-fat">—</div></div>
+        <div class="nut-row" style="margin-bottom:0"><div class="nut-label">🔥 Calories</div><div style="flex:1"><div class="nut-bar-wrap"><div class="nut-bar" id="bar-cal" style="background:var(--berry);width:0%"></div></div></div><div class="nut-val" id="val-cal">—</div></div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:10px">Approximate daily averages based on planned meals.</div>
+      </div>
+      <button class="btn btn-berry btn-full" id="nut-btn" onclick="analyseNutrition()">🔍 Analyse this week's meals</button>
+      <div id="nut-breakdown" style="margin-top:10px"></div>
+    </div>
+
+    <div id="home-prep" style="display:none">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Smart batch-cook plan — make once, use across multiple meals.</div>
+      <div id="prep-timeline-content"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Plan your meals first, then generate your prep timeline.</div></div>
+      <button class="btn btn-berry btn-full" id="prep-btn" onclick="generatePrepTimeline()">⏱ Generate prep timeline</button>
+    </div>
+  </div>
+
+  <!-- ── RECIPES TAB ─────────────────────────────────────────── -->
+  <div class="screen" id="screen-recipes">
+    <div class="stats-row" style="margin-top:2px">
+      <div class="stat-card"><div class="stat-num" id="recipe-count">0</div><div class="stat-label">recipes</div></div>
+      <div class="stat-card"><div class="stat-num" id="avg-time">—</div><div class="stat-label">avg cook time</div></div>
+    </div>
+
+    <!-- Mine vs Vault toggle -->
+    <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:10px">
+      <button class="recipe-view-tab tab active" onclick="switchRecipeView('mine',this)" style="flex:1;padding:7px;text-align:center;font-size:12px;font-weight:500;cursor:pointer;border:none">My Recipes</button>
+      <button class="recipe-view-tab tab" onclick="switchRecipeView('vault',this)" style="flex:1;padding:7px;text-align:center;font-size:12px;font-weight:500;cursor:pointer;border:none">Vault</button>
+    </div>
+
+    <input class="input" placeholder="Search recipes..." oninput="filterRecipes(this.value)" style="margin-bottom:8px"/>
+    <div class="filter-bar" id="filter-bar">
+      <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
+    </div>
+    <div id="recipes-list"></div>
+    <div style="display:flex;gap:7px;margin-top:4px">
+      <button class="btn btn-outline btn-full" onclick="openAddModal()">+ Add manually</button>
+      <button class="btn btn-leaf btn-full" onclick="openIngredientsModal()">🥦 Use my ingredients</button>
+    </div>
+  </div>
+
+  <!-- ── GROCERY TAB ─────────────────────────────────────────── -->
+  <div class="screen" id="screen-grocery">
+    <div style="margin-bottom:10px">
+      <div style="font-size:15px;font-weight:500" id="grocery-title">This week's list</div>
+      <div style="font-size:11px;color:var(--text-muted)" id="grocery-summary">0 of 0 items</div>
+    </div>
+    <div class="card"><div id="grocery-list"></div></div>
+    <button class="btn btn-leaf btn-full" style="margin-top:4px" onclick="generateGrocery()">🛒 Regenerate from meal plan</button>
+  </div>
+
+  <!-- ── PROFILE TAB ─────────────────────────────────────────── -->
+  <div class="screen" id="screen-profile">
+    <div id="profile-content">
+      <!-- rendered by renderProfileScreen() in auth.js -->
+    </div>
+
+    <div class="section-label">📋 Paste a Recipe</div>
+    <div class="card-sm">
+      <div id="paste-step-1">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Copy any recipe text — from Instagram, YouTube, a blog, anywhere — paste it here.</div>
+        <textarea class="input" id="paste-import-input" rows="5" placeholder="Paste recipe text here..." style="resize:none;margin-bottom:8px"></textarea>
+        <button class="btn btn-primary btn-sm btn-full" onclick="parseAndShowForm()">→ Continue</button>
+      </div>
+      <div id="paste-step-2" style="display:none">
+        <div class="input-group"><label class="input-label">Recipe name *</label><input class="input" id="paste-name" placeholder="e.g. Palak Paneer"/></div>
+        <div style="display:flex;gap:8px">
+          <div class="input-group" style="flex:1"><label class="input-label">Category *</label>
+            <select class="input" id="paste-type">
+              <option value="Dinner">🌙 Dinner</option>
+              <option value="Breakfast">🌅 Breakfast</option>
+              <option value="Snack">🍿 Snack</option>
+              <option value="Dessert">🍮 Dessert</option>
+              <option value="Salad">🥗 Salad</option>
+              <option value="Soup">🍲 Soup</option>
+              <option value="Sauce">🌿 Sauce & Chutney</option>
+              <option value="Dip">🫙 Dip & Dressing</option>
+            </select>
+          </div>
+          <div class="input-group" style="flex:1"><label class="input-label">Time (mins)</label><input class="input" id="paste-time" type="number" placeholder="30"/></div>
+        </div>
+        <div class="input-group"><label class="input-label">Ingredients * <span style="font-weight:400;color:var(--text-muted)">(one per line)</span></label><textarea class="input" id="paste-ingredients" rows="5" style="resize:none" placeholder="1 cup spinach&#10;200g paneer&#10;..."></textarea></div>
+        <div class="input-group"><label class="input-label">Steps * <span style="font-weight:400;color:var(--text-muted)">(one per line)</span></label><textarea class="input" id="paste-steps" rows="5" style="resize:none" placeholder="Heat oil in pan&#10;Add onions..."></textarea></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px;background:var(--saffron-light);border-radius:var(--radius-sm)">
+          <input type="checkbox" id="paste-shared" style="width:16px;height:16px;accent-color:var(--saffron);flex-shrink:0"/>
+          <label for="paste-shared" style="font-size:12px;cursor:pointer">Share this recipe with everyone in the vault</label>
+        </div>
+        <div style="display:flex;gap:7px;margin-top:4px">
+          <button class="btn btn-outline btn-sm" onclick="resetPasteForm()" style="flex:1">← Back</button>
+          <button class="btn btn-primary btn-sm" onclick="savePastedRecipe()" style="flex:2">Save to Vault</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── BOTTOM NAV ──────────────────────────────────────────── -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="navigate('home',this)"><span class="nav-icon">📅</span><span>Plan</span></button>
+    <button class="nav-item" onclick="navigate('recipes',this)"><span class="nav-icon">📖</span><span>Recipes</span></button>
+    <button class="nav-item" onclick="navigate('grocery',this)"><span class="nav-icon">🛒</span><span>Grocery</span></button>
+    <button class="nav-item" onclick="navigate('profile',this)"><span class="nav-icon">👤</span><span>Profile</span></button>
+  </nav>
+
+  <!-- ── MODALS ──────────────────────────────────────────────── -->
+  <div class="modal-overlay" id="smart-plan-modal">
+    <div class="modal"><div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeModal('smart-plan-modal')">×</button>
+      <div class="modal-title">🎲 Auto-plan my cook days</div>
+      <div id="plan-source-selector" style="font-size:12px;color:var(--text-muted);margin-bottom:12px"></div>
+      <div id="smart-plan-content"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px"><span class="spinner" style="border-top-color:var(--saffron)"></span></div></div>
+      <button class="btn btn-leaf btn-full" id="smart-plan-save-btn" onclick="saveSmartPlan()" style="margin-top:10px;display:none" disabled>✓ Save this plan</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="suggest-modal">
+    <div class="modal"><div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeModal('suggest-modal')">×</button>
+      <div class="modal-title">✨ Meal Suggestions</div>
+      <div id="suggestions-content"></div>
+      <button class="btn btn-primary btn-full" id="suggest-btn" onclick="getSuggestions()">Get suggestions for this day</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal"><div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeModal('add-modal')">×</button>
+      <div class="modal-title">Add Recipe</div>
+      <div class="input-group"><label class="input-label">Recipe name</label><input class="input" id="new-name" placeholder="e.g. Palak Tofu"/></div>
+      <div class="input-group"><label class="input-label">Cook time (mins)</label><input class="input" id="new-time" type="number" placeholder="25"/></div>
+      <div class="input-group"><label class="input-label">Meal type</label>
+        <select class="input" id="new-type">
+          <option>Dinner</option><option>Breakfast</option><option>Snack</option>
+          <option>Dessert</option><option>Salad</option><option>Both</option>
+        </select>
+      </div>
+      <div class="input-group"><label class="input-label">Ingredients (comma separated)</label><input class="input" id="new-ingredients" placeholder="spinach, tofu, onion"/></div>
+      <div class="input-group"><label class="input-label">Steps (one per line)</label><textarea class="input" id="new-steps" rows="3" placeholder="Step 1&#10;Step 2" style="resize:none"></textarea></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px;background:var(--saffron-light);border-radius:var(--radius-sm)">
+        <input type="checkbox" id="new-shared" style="width:16px;height:16px;accent-color:var(--saffron);flex-shrink:0"/>
+        <label for="new-shared" style="font-size:12px;cursor:pointer">Share this recipe with everyone in the vault</label>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="saveNewRecipe()">Save Recipe</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="recipe-detail-modal">
+    <div class="modal"><div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeModal('recipe-detail-modal')">×</button>
+      <div id="recipe-detail-content"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="ingredients-modal">
+    <div class="modal"><div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeModal('ingredients-modal')">×</button>
+      <div class="modal-title">🥦 What's in your kitchen?</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Enter ingredients you want to use — I'll find matching recipes or create a new one.</div>
+      <div class="input-group">
+        <label class="input-label">Ingredients I have (comma separated)</label>
+        <input class="input" id="ing-input" placeholder="spinach, paneer, tomatoes, cumin..." oninput="clearIngResults()"/>
+      </div>
+      <div style="display:flex;gap:7px;margin-bottom:4px">
+        <button class="btn btn-outline btn-full" onclick="findByIngredients()">🔍 Find in vault</button>
+        <button class="btn btn-primary btn-full" id="gen-recipe-btn" onclick="generateRecipeFromIngredients()">✨ Generate recipe</button>
+      </div>
+      <div id="ing-results" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- ── INSTAGRAM IMPORT MODAL ───────────────────────────────── -->
+  <div class="modal-overlay" id="ig-import-modal">
+    <div class="modal"><div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeModal('ig-import-modal')">×</button>
+      <div class="modal-title">📸 Import from Instagram</div>
+
+      <!-- STATE: LOGIN -->
+      <div id="ig-state-login">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.5">
+          Connect your Instagram account to import saved recipes directly into your vault.
+        </div>
+
+        <!-- Native: open Instagram in-app browser -->
+        <button id="ig-native-btn" class="btn btn-primary btn-full" style="margin-bottom:10px" onclick="igConnectNative()">
+          Open Instagram to log in
+        </button>
+
+        <!-- Web fallback: session ID paste (hidden until native btn clicked on web) -->
+        <div id="ig-web-fallback" style="display:none">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5">
+            On web: open <strong>instagram.com</strong> in another tab → F12 → Application → Cookies → copy the <code>sessionid</code> value and paste below.
+          </div>
+          <input class="input" id="ig-session-input" placeholder="Paste sessionid cookie value…" style="margin-bottom:8px"/>
+          <button class="btn btn-primary btn-full" style="margin-bottom:10px" onclick="igSubmitSessionId()">Connect</button>
+
+          <div style="text-align:center;font-size:11px;color:var(--text-muted);margin:8px 0">— or sign in directly —</div>
+          <input class="input" id="ig-username" placeholder="Instagram username" style="margin-bottom:6px"/>
+          <input class="input" id="ig-password" type="password" placeholder="Password" style="margin-bottom:8px"/>
+          <button id="ig-login-btn" class="btn btn-outline btn-full" onclick="igSubmitLogin()">Connect</button>
+        </div>
+
+        <div id="ig-login-error" style="font-size:11px;color:#C0392B;margin-top:8px;min-height:16px"></div>
+      </div>
+
+      <!-- STATE: COLLECTIONS -->
+      <div id="ig-state-collections" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--text-muted)">Connected as <strong id="ig-connected-name"></strong></div>
+          <button onclick="igDisconnect()" style="background:none;border:none;font-size:11px;color:var(--text-muted);cursor:pointer;padding:2px 4px">Disconnect</button>
+        </div>
+        <div id="ig-collections-error" style="display:none;font-size:12px;color:#C0392B;background:#FEF0EF;border:1px solid #F5B7B1;border-radius:8px;padding:10px 12px;margin-bottom:10px">
+        </div>
+        <div style="font-size:12px;font-weight:500;margin-bottom:8px">Pick a folder to import from:</div>
+        <div id="ig-collections-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:280px;overflow-y:auto"></div>
+        <button class="btn btn-outline btn-sm" style="margin-top:10px;width:100%" onclick="igRetryFolder()">🔄 Refresh folders</button>
+      </div>
+
+      <!-- STATE: IMPORTING -->
+      <div id="ig-state-importing" style="display:none;text-align:center;padding:24px 0">
+        <div style="font-size:36px;margin-bottom:12px">📥</div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:6px" id="ig-importing-text">Importing…</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:16px">This can take a minute — extracting recipes with AI</div>
+        <span class="spinner" style="width:24px;height:24px"></span>
+      </div>
+
+      <!-- STATE: RESULT -->
+      <div id="ig-state-result" style="display:none;text-align:center;padding:16px 0">
+        <div id="ig-result-content"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-outline btn-full" onclick="igImportAnother()">Import another folder</button>
+          <button class="btn btn-primary btn-full" onclick="closeModal('ig-import-modal')">Done</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<!-- ── SUPABASE + CONFIG ────────────────────────────────────────── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 'use strict';
+const SURL     = '__SUPABASE_URL__';
+const SKEY     = '__SUPABASE_KEY__';
+const API_BASE = '__API_BASE__';
+</script>
+
+<!-- ── MODULES (load order: utils → core → components → features) ── -->
+<script src="src/utils/date.js"></script>
+<script src="src/utils/analytics.js"></script>
+<script src="src/core/state.js"></script>
+<script src="src/core/db.client.js"></script>
+<script src="src/core/db.recipes.js"></script>
+<script src="src/core/db.mealplan.js"></script>
+<script src="src/core/db.groceries.js"></script>
+<script src="src/core/ui.toasts.js"></script>
+<script src="src/core/ui.nav.js"></script>
+<script src="src/core/ui.modals.js"></script>
+<script src="src/core/ai.js"></script>
+<script src="src/components/source-badge.js"></script>
+<script src="src/components/sweetener-tag.js"></script>
+<script src="src/components/recipe-card.js"></script>
+<script src="src/features/auth/auth.js"></script>
+<script src="src/features/auth/setup.js"></script>
+<script src="src/features/auth/profile.js"></script>
+<script src="src/features/recipes/recipes.filter.js"></script>
+<script src="src/features/recipes/recipes.list.js"></script>
+<script src="src/features/recipes/recipes.detail.js"></script>
+<script src="src/features/recipes/recipes.form.js"></script>
+<script src="src/features/plan/plan.week.js"></script>
+<script src="src/features/plan/plan.slots.js"></script>
+<script src="src/features/plan/plan.ai.js"></script>
+<script src="src/features/plan/plan.nutrition.js"></script>
+<script src="src/features/plan/plan.prep.js"></script>
+<script src="src/features/plan/plan.ingredients.js"></script>
+<script src="src/features/grocery/grocery.dedup.js"></script>
+<script src="src/features/grocery/grocery.generate.js"></script>
+<script src="src/features/grocery/grocery.render.js"></script>
+<script src="src/features/import/instagram.js"></script>
+<script src="src/features/import/paste.js"></script>
+<script src="src/utils/platform.js"></script>
+
+<!-- ── BOOT ───────────────────────────────────────────────────── -->
+<script>
+'use strict';
 
-// ── CONFIG ──────────────────────────────────────────────────────────────────
-const GEMINI_KEY = '__GEMINI_KEY__';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-
-const SURL = '__SUPABASE_URL__';
-const SKEY = '__SUPABASE_KEY__';
-
-// ── STATE ───────────────────────────────────────────────────────────────────
-const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const today = new Date();
-const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
-let selectedDay = todayIdx;
-let weekOffset = 0;
-let activeFilter = 'all';
-let searchQuery = '';
-let recipes = [];
-let mealPlan = {};
-let groceries = [];
-let pendingImport = null;
-let db = null;
-
-// ── SUPABASE INIT ────────────────────────────────────────────────────────────
-function initDB() {
-  try {
-    db = window.supabase.createClient(SURL, SKEY);
-    return true;
-  } catch(e) {
-    showError('Could not connect to database. Please check your internet connection.');
-    return false;
-  }
-}
-
-async function dbFrom(table) {
-  if (!db) throw new Error('No database connection');
-  return db.from(table);
-}
-
-// ── ERROR HANDLING ───────────────────────────────────────────────────────────
-function showError(msg) {
-  let bar = document.getElementById('error-bar');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.id = 'error-bar';
-    bar.style.cssText = 'position:fixed;top:0;left:50%;transform:translateX(-50%);max-width:420px;width:100%;background:#C0392B;color:#fff;text-align:center;font-size:12px;padding:8px 12px;z-index:9999;font-family:DM Sans,sans-serif;line-height:1.4';
-    document.body.appendChild(bar);
-  }
-  bar.textContent = msg;
-  bar.style.display = 'block';
-  setTimeout(() => { bar.style.display = 'none'; }, 5000);
-}
-
-function showStatus(msg, color) {
-  let bar = document.getElementById('status-bar');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.id = 'status-bar';
-    bar.style.cssText = 'position:fixed;top:0;left:50%;transform:translateX(-50%);max-width:420px;width:100%;color:#fff;text-align:center;font-size:12px;padding:6px;z-index:9998;font-family:DM Sans,sans-serif';
-    document.body.appendChild(bar);
-  }
-  bar.style.background = color || 'var(--leaf)';
-  bar.textContent = msg;
-  bar.style.display = 'block';
-}
-
-function hideStatus() {
-  const bar = document.getElementById('status-bar');
-  if (bar) bar.style.display = 'none';
-}
-
-// ── DEFAULT RECIPES ──────────────────────────────────────────────────────────
-const DEFAULT_RECIPES = [
-  {id:1,name:'Masoor Dal Tadka',time:25,type:'Dinner',emoji:'🍛',ingredients:['1 cup masoor dal','1 onion chopped','2 tomatoes chopped','1 tsp cumin seeds','2 tbsp ghee','1/2 tsp turmeric','salt to taste'],tags:['protein','easy'],steps:['Pressure cook masoor dal with turmeric and salt for 3 whistles.','Heat ghee, add cumin seeds till they splutter.','Add onion, sauté till golden. Add tomatoes and cook till mushy.','Add dal and simmer 10 mins. Finish with a red chilli tadka.'],source:'default',board:null},
-  {id:2,name:'Poha with Peanuts',time:15,type:'Breakfast',emoji:'🥣',ingredients:['2 cups poha','1/4 cup peanuts','1 onion chopped','curry leaves','1 tsp mustard seeds','1/2 tsp turmeric','lemon juice','salt','coriander'],tags:['light','quick'],steps:['Rinse poha gently, drain and set aside.','Heat oil, add mustard seeds, curry leaves and peanuts.','Add onion, sauté 2 mins. Add turmeric and salt.','Add poha, mix gently, cook 3 mins. Squeeze lemon and garnish with coriander.'],source:'default',board:null},
-  {id:3,name:'Palak Paneer',time:30,type:'Dinner',emoji:'🥬',ingredients:['400g spinach','250g paneer cubed','1 onion','2 tomatoes','2 tbsp cream','1 tsp garam masala','salt'],tags:['protein','iron'],steps:['Blanch spinach 2 mins, blend smooth.','Fry paneer cubes till golden, set aside.','Sauté onion, add tomatoes, cook till mushy.','Add garam masala, spinach paste, cook 5 mins. Add paneer and cream, simmer 3 mins.'],source:'default',board:null},
-  {id:4,name:'Besan Chilla',time:20,type:'Breakfast',emoji:'🫓',ingredients:['1 cup besan','1 onion','1 green chilli','coriander','1/2 tsp ajwain','salt','water'],tags:['protein','quick'],steps:['Mix besan with water to a smooth pourable batter.','Add onion, chilli, coriander, ajwain and salt.','Heat tawa, pour batter and spread thin.','Cook 3 mins per side till golden. Serve with chutney.'],source:'default',board:null},
-  {id:5,name:'Rajma Chawal',time:35,type:'Dinner',emoji:'🫘',ingredients:['1 cup rajma soaked overnight','1 cup basmati rice','1 onion','2 tomatoes','1 inch ginger','4 garlic cloves','1 tsp garam masala','salt'],tags:['protein','filling'],steps:['Pressure cook soaked rajma for 4 whistles.','Cook rice separately.','Sauté onion with ginger-garlic, add tomatoes and garam masala.','Add rajma with water, simmer 10 mins. Serve over rice.'],source:'default',board:null},
-  {id:6,name:'Chana Masala',time:30,type:'Dinner',emoji:'🫛',ingredients:['1 can chickpeas','1 onion','2 tomatoes','1 tsp chana masala','1 inch ginger','lemon juice','coriander'],tags:['protein','filling'],steps:['Sauté onion, add ginger paste, cook 2 mins.','Add tomatoes and chana masala, cook 8 mins.','Add chickpeas, simmer 10 mins. Finish with lemon juice and coriander.'],source:'default',board:null},
-  {id:7,name:'Oats Khichdi',time:20,type:'Breakfast',emoji:'🥣',ingredients:['1 cup rolled oats','1/4 cup moong dal','1 carrot grated','1/2 inch ginger','1/2 tsp turmeric','1 tsp ghee','1 tsp cumin','salt'],tags:['healthy','quick'],steps:['Dry roast oats 2 mins, set aside.','Heat ghee, add cumin, ginger and carrot. Add moong dal, turmeric, 2 cups water, cook 8 mins.','Add oats, stir, cook 5 more mins. Season and serve.'],source:'default',board:null},
-  {id:8,name:'Moong Dal Cheela',time:18,type:'Breakfast',emoji:'🥞',ingredients:['1 cup moong dal soaked 2 hrs','1/2 inch ginger','1 green chilli','coriander','salt','oil'],tags:['protein','light'],steps:['Blend soaked moong dal with ginger and chilli until smooth.','Add coriander and salt. Adjust water for batter consistency.','Heat tawa, pour batter and spread thin. Cook 3 mins each side till golden.'],source:'default',board:null},
-  {id:101,name:'Paneer Quesadillas',time:30,type:'Dinner',emoji:'🫓',ingredients:['200g paneer grated','5-6 tortillas','1/2 cup red onion sliced','1/2 cup red bell pepper','1/2 cup green bell pepper','1 jalapeño','3 garlic cloves','2 tsp taco seasoning','1.5 tsp cumin powder','1.5 tsp Kashmiri chilli powder','lemon juice','coriander','cheese'],tags:['fusion','paneer','indo-mexican'],steps:['Heat oil, sauté jalapeño and garlic 30 secs. Add onion and peppers, cook 7-8 mins.','Add taco seasoning, cumin, chilli powder, sauté 30 secs.','Add grated paneer, 2 tbsp water, cover and cook 5 mins. Add lemon juice and coriander.','Heat tortilla, layer cheese, paneer filling, pickled jalapeño, more cheese, fold.','Cook both sides till golden and crispy. Serve with yogurt chutney and salsa.'],source:'pinterest',board:'Main Course'},
-  {id:102,name:'Avocado Pasta',time:25,type:'Dinner',emoji:'🍝',ingredients:['400g linguine','2 ripe avocados','2 egg yolks','2 kale leaves','3 garlic cloves','1/4 cup olive oil','1.5 tbsp lemon juice','1/2 tsp paprika','pinch cayenne','1 cup reserved pasta water','parmesan','salt and pepper'],tags:['quick','creamy','fusion'],steps:['Boil pasta until al dente. Reserve 1 cup pasta water before draining.','Blend avocados, egg yolks, kale, garlic, olive oil, lemon juice, paprika and cayenne until smooth.','With blender running on low, slowly add hot pasta water to cook the egg yolks safely.','Pour avocado sauce over warm pasta and toss. Serve with parmesan and black pepper.'],source:'pinterest',board:'Main Course'},
-  {id:103,name:'Mexican Paneer & Corn Sliders',time:55,type:'Dinner',emoji:'🌽',ingredients:['250g paneer cubed','1 cup roasted corn','1 red onion','4-5 garlic cloves','1/2 jalapeño','1/2 bell pepper','3 tbsp tomato paste','2 tbsp hot sauce','1 tsp paprika','1 tsp cumin','1 tsp oregano','12 slider buns','slaw mix','coriander chutney','cheese','butter'],tags:['fusion','paneer','party'],steps:['Mix paneer, corn, onion, garlic, jalapeño, bell pepper, tomato paste, hot sauce and spices.','Slice slider buns. Spread mayo-hot sauce on bottom halves.','Layer slaw, cheese, paneer-corn mix, more cheese. Add chutney to top buns.','Brush with melted butter, cover with foil, bake at 175C for 20-30 mins. Remove foil last 5 mins.'],source:'pinterest',board:'Main Course'},
-  {id:104,name:'Black Bean Enchiladas',time:45,type:'Dinner',emoji:'🌮',ingredients:['1 can black beans drained','1 can corn drained','1 green bell pepper diced','1 small onion diced','2 garlic cloves','1 tsp cumin','1/4 tsp oregano','1/4 tsp smoked paprika','8 flour tortillas','2 cups enchilada sauce','2 cups shredded cheese','salt'],tags:['mexican','baked','filling'],steps:['Preheat oven to 175C. Sauté garlic, onion and pepper in oil 8 mins.','Add black beans, corn, cumin, oregano, paprika and salt. Cook 3 mins. Stir in 1/4 cup enchilada sauce.','Warm tortillas, fill each with bean mixture and cheese, roll tightly.','Place seam-down in a baking dish. Pour remaining sauce and cheese over top.','Bake 20 mins until cheese is melted and bubbly.'],source:'pinterest',board:'Main Course'},
-  {id:105,name:'Chickpea Flour Mini Veggie Frittatas',time:45,type:'Both',emoji:'🥚',ingredients:['2 cups chickpea flour','1/4 cup nutritional yeast','1 tsp baking powder','1 tsp sea salt','2.5 cups water','3 cups mixed veggies','1/2 cup green onions','2 tbsp olive oil'],tags:['protein','vegan','baked','meal-prep'],steps:['Preheat oven to 200C. Whisk chickpea flour, nutritional yeast, baking powder, salt and water until smooth.','Heat oil, cook veggies 7 mins until softened. Add green onions, cook 2 more mins.','Brush muffin tin with oil. Divide veggie mix and pour batter over each cup.','Bake 30-35 mins until toothpick comes out clean. Cool 10 mins before removing.'],source:'pinterest',board:'Main Course'},
-  {id:106,name:'Paneer Pineapple in Pistachio Gravy',time:60,type:'Dinner',emoji:'🍍',ingredients:['250g paneer cubed','1 cup pineapple cubed','1.5 cups shallots','2 tbsp pistachio','1 tbsp melon seeds','5 almonds','cilantro and mint','1 inch ginger','2-3 green chillies','1.5 cups yogurt','cream and milk','kasoori methi','garam masala','salt'],tags:['festive','paneer','special'],steps:['Sauté shallots with spices, pistachio, melon seeds and almonds. Add water, simmer 5-6 mins.','Drain and blend with cilantro, mint, ginger, chillies and yogurt.','Marinate paneer and pineapple in 2 tbsp raw gravy for 20 mins.','Heat remaining gravy with kasoori methi. Simmer till oil separates. Finish with garam masala and milk.','Grill paneer and pineapple skewers till golden. Serve on gravy bed, topped with cream and pistachio slivers.'],source:'pinterest',board:'Main Course'},
-  {id:107,name:'Achari Paneer Upside Down Puff Pastry',time:45,type:'Dinner',emoji:'🥐',ingredients:['paneer in strips','amchur, chilli powder, garam masala, chaat masala, kasoori methi','1 tbsp mixed pickle mashed','1 puff pastry sheet (9 squares)','3 tbsp honey','onions and bell peppers sliced','kalonji and saunf'],tags:['fusion','baked','party'],steps:['Mix paneer with all spices and pickle. Marinate 30 mins in fridge.','Preheat oven to 180C.','On parchment, spread 1 tsp honey. Sprinkle kalonji and saunf on top.','Place paneer strips and onion and bell pepper over honey. Cover with puff pastry square, seal edges.','Bake 15 mins until golden. Flip gently. Serve with mint-garlic dip.'],source:'pinterest',board:'Main Course'},
-  {id:108,name:'Cilantro Lime Rice',time:35,type:'Dinner',emoji:'🍚',ingredients:['1.5 cups long-grain white rice','1 tbsp olive oil or butter','1/2 cup onion finely chopped','2 garlic cloves minced','2.25 cups vegetable broth','1/4 tsp salt','3 tbsp fresh lime juice','1 cup fresh cilantro chopped'],tags:['quick','mexican','side'],steps:['Rinse rice under cold water until water runs clear.','Heat oil, add rice and onion. Cook 3-4 mins stirring until rice turns bright white.','Add garlic, cook 30 secs. Pour in broth, season with salt, bring to boil.','Reduce to lowest heat, cover and cook 15 mins. Remove from heat, leave covered 10 more mins.','Uncover, fluff with fork, scatter lime juice and cilantro on top. Toss gently and serve.'],source:'pinterest',board:'Main Course'},
-  {id:109,name:'Smashed Chickpea Avocado Sandwiches',time:10,type:'Dinner',emoji:'🥑',ingredients:['1.5 cups cooked chickpeas','1 ripe avocado','3 tbsp lemon juice','1 garlic clove minced','1 celery rib diced','1/4 cup dill pickles chopped','1/4 cup fresh dill','2 green onions chopped','salt and pepper','whole grain bread','lettuce'],tags:['quick','no-cook','protein'],steps:['Mash chickpeas with a fork until roughly broken up — keep some texture.','Mash in the avocado until combined.','Add lemon juice, garlic, green onion, celery, dill, pickles, salt and pepper. Stir to combine.','Spread on bread, top with lettuce and second slice. Serve immediately.'],source:'pinterest',board:'Main Course'},
-  {id:110,name:'7 Easy Tofu Marinades',time:20,type:'Dinner',emoji:'🫙',ingredients:['400g extra firm tofu pressed and cubed'],tags:['tofu','versatile','prep-ahead'],steps:['Press tofu 30 mins to remove excess water. Cut into 1-inch cubes.','Cilantro Lime: 1/3 cup oil + 1/4 cup lime juice + cilantro + 2 garlic cloves + salt.','Garlic Soy: 3 tbsp soy sauce + 3 tbsp sesame oil + 2 tbsp rice vinegar + 1 tsp garlic powder.','Sweet & Sour: 1/3 cup soy sauce + 1/4 cup dates syrup + 2 tbsp apple cider vinegar + 1 tsp ginger.','Marinate minimum 30 mins. Cook in hot pan 8-10 mins or bake at 200C 16-20 mins until crispy.'],source:'pinterest',board:'Main Course'},
-  {id:201,name:'Chia Seed Pudding (6 Ways)',time:10,type:'Breakfast',emoji:'🥣',ingredients:['3 tbsp chia seeds','3/4 cup milk of choice','1 tbsp jaggery syrup or dates syrup','1 tsp vanilla extract'],tags:['no-cook','prep-ahead','healthy'],steps:['Combine chia seeds, milk, sweetener and vanilla in a jar. Stir well.','Leave at room temperature 15 mins to thicken, stirring once after 5 mins.','Flavours: Banana Bread (mashed banana + cinnamon), Chai Latte (cardamom + ginger + cinnamon), Dark Chocolate (2 tbsp cocoa), Vanilla Coconut (coconut milk + cashew butter), Lemon Raspberry (lemon zest + raspberries).','Store in fridge up to 5 days. Top with fresh fruit and nuts before serving.'],source:'pinterest',board:'Breakfast'},
-  {id:202,name:'Overnight Oats (10 Flavours)',time:10,type:'Breakfast',emoji:'🌾',ingredients:['1 cup rolled oats','1 cup milk','2/3 cup plain yogurt','1 tbsp jaggery or dates syrup','1/4 tsp salt','2 tsp chia seeds (optional)'],tags:['no-cook','prep-ahead','filling'],steps:['Combine oats, milk, yogurt, sweetener, salt and chia seeds. Stir well.','Add-ins: Vanilla, Chocolate (cocoa + choc chips), Banana Bread (mashed banana + cinnamon), Apple Cinnamon (chopped apple + cinnamon), Carrot Cake (shredded carrot + raisins + cinnamon).','Transfer to mason jars, seal and refrigerate overnight (minimum 4 hours).','In the morning, stir well and add toppings like fruit, nuts or granola.'],source:'pinterest',board:'Breakfast'},
-  {id:203,name:'Smoothie Bowls',time:10,type:'Breakfast',emoji:'🍓',ingredients:['2 cups frozen banana or berries','1/2 cup coconut milk','1 tbsp chia seeds','toppings: granola, fresh fruit, seeds, nut butter'],tags:['quick','healthy','no-cook'],steps:['Let frozen fruit sit 3-5 mins to slightly soften.','Blend frozen fruit with coconut milk until thick and smooth like soft serve.','Pour into a bowl immediately.','Add toppings: granola, fresh berries, sliced banana, chia seeds, nut butter drizzle. Serve immediately.'],source:'pinterest',board:'Breakfast'},
-  {id:301,name:'Masala Peanut Chaat',time:15,type:'Snack',emoji:'🥜',ingredients:['1 cup roasted peanuts','1 tsp chaat masala','juice of 1 lemon','1 small onion diced','1 tomato diced','coriander','1 green chilli','salt'],tags:['snack','street-food','quick'],steps:['Combine peanuts, onion, tomato, green chilli and coriander in a bowl.','Add chaat masala, lemon juice and salt. Toss well.','Taste and adjust. Serve immediately while peanuts are crunchy.'],source:'pinterest',board:'Small Bites'},
-  {id:302,name:'Lasooni Chili Peanuts',time:15,type:'Snack',emoji:'🌶',ingredients:['1 cup peanuts','4-5 garlic cloves minced','2-3 dry red chillies','8-10 curry leaves','2 tbsp oil','salt'],tags:['snack','spicy','quick'],steps:['Heat oil in a pan over medium heat.','Add garlic and stir till light golden. Add dry red chillies and curry leaves, fry 30 seconds.','Add peanuts and toss to coat well. Cook on low 5-7 mins stirring regularly. Add salt. Cool before serving.'],source:'pinterest',board:'Small Bites'},
-  {id:303,name:'Sweet Potato Tikki with Guava Mint Chutney',time:40,type:'Snack',emoji:'🍠',ingredients:['2 medium sweet potatoes boiled and mashed','100g paneer grated','2 tbsp samo seeds or breadcrumbs','1/2 tsp chaat masala','1/2 tsp cumin powder','salt','ghee for pan frying','For chutney: 1 guava, 1 cup mint, 1/2 cup coriander, 1 green chilli, lemon juice, salt'],tags:['snack','healthy','indian'],steps:['Boil and mash sweet potatoes. Let cool completely.','Mix with grated paneer, samo seeds, chaat masala, cumin and salt.','Shape into round tikkis about 1 cm thick.','Heat ghee on a tawa, cook tikkis 3-4 mins per side until golden and crisp.','Blend chutney ingredients until smooth. Serve hot tikkis with chutney and yogurt.'],source:'pinterest',board:'Small Bites'},
-  {id:304,name:'Sabudana Layer Chaat',time:20,type:'Snack',emoji:'🫙',ingredients:['1 cup sabudana soaked 4 hrs','1/4 cup peanuts crushed','1 potato boiled and diced','1/2 cup yogurt whisked','green chutney','tamarind chutney','chaat masala','sev','pomegranate seeds'],tags:['snack','street-food','indian'],steps:['Cook soaked sabudana in pan with ghee until translucent. Add peanuts and salt.','Layer in a glass: sabudana at base, then diced potato.','Drizzle green chutney and tamarind chutney.','Top with whisked yogurt, sprinkle chaat masala, sev and pomegranate. Serve immediately.'],source:'pinterest',board:'Small Bites'},
-  {id:305,name:'Kolkata Masala Crostini',time:20,type:'Snack',emoji:'🍞',ingredients:['6-8 slices bread toasted','2 potatoes boiled and diced','green chutney','tamarind chutney','1/2 cup yogurt whisked','sev','chaat masala','cumin powder','red chilli powder','pomegranate seeds','coriander'],tags:['snack','fusion','street-food'],steps:['Toast bread slices until golden and crispy.','Spread green chutney generously on each toast.','Top with diced boiled potato. Drizzle tamarind chutney then spoon whisked yogurt.','Sprinkle chaat masala, cumin, red chilli. Finish with sev, pomegranate and coriander. Serve immediately.'],source:'pinterest',board:'Small Bites'},
-  {id:306,name:'Elote Dip (Mexican Street Corn)',time:15,type:'Snack',emoji:'🌽',ingredients:['2 cups corn kernels','1/2 cup cream cheese softened','2 tbsp butter','1 tsp chilli powder','juice of 1 lime','1/4 cup coriander','salt','tortilla chips to serve'],tags:['snack','mexican','party'],steps:['Heat butter in a pan. Add corn and cook 5-7 mins until slightly charred.','Reduce heat, add cream cheese and stir until melted and creamy.','Add chilli powder, lime juice and salt. Transfer to a serving bowl. Garnish with coriander. Serve hot with tortilla chips.'],source:'pinterest',board:'Small Bites'},
-  {id:307,name:'Papdi Chaat in Martini Glasses',time:20,type:'Snack',emoji:'🍸',ingredients:['20-24 papdi','1 cup chickpeas boiled','1 cup yogurt whisked','green chutney','tamarind chutney','sev','pomegranate seeds','chaat masala','red chilli powder'],tags:['snack','party','street-food'],steps:['Whisk yogurt with salt and cumin until smooth.','Layer in martini glasses: broken papdi at base, then chickpeas.','Drizzle green chutney and tamarind chutney generously.','Spoon yogurt on top. Sprinkle chaat masala, red chilli, sev and pomegranate. Serve immediately.'],source:'pinterest',board:'Small Bites'},
-  {id:308,name:'Masala Corn Toasts',time:15,type:'Snack',emoji:'🌽',ingredients:['4-6 slices bread','1 cup corn kernels','2 tbsp butter softened','1/2 tsp chilli flakes','1/2 tsp mixed herbs','grated cheese','juice of 1/2 lemon','salt','coriander'],tags:['snack','quick','party'],steps:['Mix corn with butter, chilli flakes, herbs, lemon juice and salt.','Spread mixture generously on bread slices. Top with grated cheese.','Bake at 180C for 10-12 mins or grill until cheese is melted and bubbly. Garnish with coriander.'],source:'pinterest',board:'Small Bites'},
-  {id:309,name:'Mexican Street Corn Deviled Eggs',time:20,type:'Snack',emoji:'🥚',ingredients:['6 eggs hard boiled','1/4 cup roasted corn','2 tbsp yogurt or mayo','1 tbsp lime juice','1/4 tsp chilli powder','1/4 tsp smoked paprika','salt','coriander for garnish'],tags:['snack','eggs','mexican'],steps:['Hard boil eggs, cool and peel. Slice in half lengthwise.','Scoop yolks into a bowl. Mash with yogurt, lime juice, chilli powder and salt until smooth.','Stir in most of the corn. Pipe or spoon yolk mix back into egg white halves.','Top with corn, sprinkle paprika and coriander. Serve chilled.'],source:'pinterest',board:'Small Bites'},
-  {id:310,name:'Paneer & Potato Dumplings with Spinach Sauce',time:40,type:'Snack',emoji:'🥟',ingredients:['200g paneer grated','2 potatoes boiled and mashed','1/2 tsp chaat masala','1/4 tsp cumin powder','salt','For sauce: 2 cups spinach, 1/4 cup cream, 2 garlic cloves, salt'],tags:['snack','paneer','impressive'],steps:['Mix paneer, mashed potato, chaat masala, cumin and salt into a smooth dough.','Shape into small dumplings or patties.','For sauce: blanch spinach 2 mins, blend with garlic and cream until smooth. Season.','Pan fry dumplings in oil 3-4 mins per side until golden. Warm spinach sauce and serve dumplings on top.'],source:'pinterest',board:'Small Bites'},
-  {id:401,name:'Kulfi Overnight Oats',time:10,type:'Dessert',emoji:'🌙',ingredients:['1/2 cup rolled oats','3/4 cup whole milk','2 tbsp condensed milk or jaggery syrup','1/4 tsp cardamom','pinch saffron','1 tbsp pistachios chopped','1 tbsp almonds chopped','1 tsp rose water'],tags:['no-cook','prep-ahead','kulfi-inspired'],steps:['Mix oats, milk, condensed milk, cardamom, saffron and rose water in a jar.','Stir well. Cover and refrigerate overnight.','In the morning, stir well and add splash more milk if too thick.','Top with chopped pistachios, almonds and extra saffron. Serve cold.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:402,name:'3 Ingredient Lemon Truffles',time:20,type:'Dessert',emoji:'🍋',ingredients:['200g white chocolate chopped','3 tbsp cream cheese softened','zest of 2 lemons','powdered jaggery for rolling (optional)'],tags:['no-bake','quick','3-ingredient'],steps:['Melt white chocolate in microwave in 30-second bursts, stirring between each.','Let cool slightly then mix in cream cheese and lemon zest until smooth.','Refrigerate 1 hour until firm enough to roll.','Scoop teaspoon-sized portions, roll into balls, then roll in powdered jaggery or lemon zest. Store in fridge up to 1 week.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:403,name:'Chocolate Jam Bites',time:15,type:'Dessert',emoji:'🍫',ingredients:['150g dark chocolate 70 percent','4 tbsp strawberry or raspberry jam','2 tbsp chopped nuts','pinch sea salt'],tags:['no-bake','quick','chocolate'],steps:['Melt dark chocolate until smooth.','Pour into silicone moulds filling halfway. Add a small dollop of jam into the centre of each.','Cover with remaining chocolate. Sprinkle nuts and sea salt.','Refrigerate 30 mins until set.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:404,name:'Strawberry Mousse',time:20,type:'Dessert',emoji:'🍓',ingredients:['2 cups fresh strawberries hulled','2 tbsp jaggery powder','1 cup heavy whipping cream','1 tsp lemon juice','1/2 tsp vanilla extract'],tags:['light','fruity','no-bake'],steps:['Blend strawberries, jaggery and lemon juice until smooth. Strain if desired.','Whip cream with vanilla until soft peaks form.','Gently fold strawberry puree into cream in two additions.','Spoon into glasses. Refrigerate at least 1 hour before serving.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:405,name:'Lebanese Semolina Pudding (Layali Lubnan)',time:30,type:'Dessert',emoji:'🥛',ingredients:['1/2 cup fine semolina','4 cups whole milk','3 tbsp jaggery','1 tbsp rose water','1 tbsp orange blossom water','1 cup thick cream for topping','2 tbsp crushed pistachios','pinch cinnamon'],tags:['middle-eastern','creamy','fragrant'],steps:['Bring milk to a gentle simmer. Gradually whisk in semolina, stirring constantly.','Add jaggery, stir until dissolved. Cook 8-10 mins until thickened.','Remove from heat, stir in rose water and orange blossom water.','Pour into bowls. Cool then refrigerate 2 hours. Before serving, spread thick cream and sprinkle with pistachios and cinnamon.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:406,name:'1 Minute Kulfa',time:5,type:'Dessert',emoji:'🍨',ingredients:['1/2 cup condensed milk','1/2 cup heavy cream','2 tbsp chopped mixed nuts','1/4 tsp cardamom','pinch saffron'],tags:['quick','no-cook','indian'],steps:['Mix condensed milk, cream, cardamom and saffron until combined.','Stir in chopped nuts.','Pour into kulfi moulds or an ice cream container. Freeze at least 4 hours or overnight.','Run warm water outside to unmould. Serve garnished with extra nuts.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:407,name:'4-Ingredient Guilt-Free Sorbet',time:10,type:'Dessert',emoji:'🧊',ingredients:['2 cups frozen mango or berries','2 tbsp jaggery syrup','juice of 1 lemon','2 tbsp water'],tags:['vegan','light','no-cook'],steps:['Let frozen fruit sit 5 mins to slightly soften.','Blend frozen fruit, jaggery syrup, lemon juice and water until completely smooth.','Serve immediately as soft-serve, or freeze 1 hour for firmer texture.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:408,name:'Rose Mehalabya (Milk Pudding)',time:25,type:'Dessert',emoji:'🌹',ingredients:['2 cups whole milk','2 tbsp cornstarch','2 tbsp jaggery powder','1 tbsp rose water','1/4 tsp cardamom','2 tbsp crushed pistachios','dried rose petals'],tags:['middle-eastern','light','fragrant'],steps:['Mix cornstarch with 1/4 cup cold milk until smooth.','Heat remaining milk with jaggery and cardamom until hot. Pour in cornstarch mix, stirring constantly.','Cook 5-7 mins until thickened. Remove from heat, stir in rose water.','Pour into glasses. Refrigerate 2 hours. Garnish with pistachios and rose petals before serving.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:409,name:'Edible Chickpea Brownie Batter',time:15,type:'Dessert',emoji:'🍫',ingredients:['400g can chickpeas drained and rinsed well','8 medjool dates pitted','3 tbsp peanut or almond butter','3 tbsp cocoa powder','1 tsp vanilla extract','pinch salt','3 tbsp dark chocolate chips'],tags:['no-bake','protein','healthy'],steps:['Drain and rinse chickpeas very well.','Blend chickpeas, dates, peanut butter, cocoa powder, vanilla and salt until very smooth (2-3 mins).','Stir in chocolate chips by hand.','Serve as a dip with fruit, or roll into balls and refrigerate.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:410,name:'Gulab Jamun in Kunafa Nests',time:45,type:'Dessert',emoji:'🌸',ingredients:['200g kunafa pastry thawed','4 tbsp butter melted','8-10 ready-made gulab jamuns','1/2 cup rose water sugar syrup','2 tbsp chopped pistachios','edible rose petals'],tags:['fusion','festive','indian'],steps:['Preheat oven to 180C. Separate kunafa strands and toss with melted butter.','Press into greased muffin tin to form nests. Bake 15-18 mins until golden.','While warm, brush with rose water sugar syrup. Let cool slightly.','Place a gulab jamun in each nest, drizzle more syrup. Garnish with pistachios and rose petals. Serve warm.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:411,name:'Motichoor Rabdi Parfait',time:20,type:'Dessert',emoji:'🍮',ingredients:['4 motichoor ladoos crumbled','1 cup thick rabdi','1/2 cup whipped cream','2 tbsp chopped pistachios','pinch saffron in 1 tsp warm milk','dried rose petals'],tags:['fusion','festive','indian'],steps:['Layer crumbled motichoor ladoo at base of a tall glass.','Spoon rabdi on top, then a layer of whipped cream.','Repeat layers until glass is full. Drizzle saffron milk on top.','Garnish with pistachios and rose petals. Refrigerate 30 mins before serving.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:412,name:'Mahi Sweet Dessert',time:25,type:'Dessert',emoji:'🍯',ingredients:['1 litre full-fat milk','3 tbsp jaggery powder','1/4 tsp cardamom','pinch saffron','2 tbsp mixed nuts','1 tsp ghee'],tags:['indian','traditional','warm'],steps:['Heat ghee in a heavy-bottomed pan. Add milk and bring to boil.','Reduce heat to low, simmer stirring frequently until milk reduces by half (20-25 mins).','Add jaggery, cardamom and saffron. Stir well. Cook 5 mins more.','Pour into bowls, top with chopped nuts. Serve warm or chilled.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:413,name:'Nutella Barfi',time:30,type:'Dessert',emoji:'🍫',ingredients:['1 cup milk powder','1/2 cup Nutella','2 tbsp butter','1/4 cup condensed milk','2 tbsp chopped pistachios'],tags:['fusion','fudge','festive'],steps:['Heat butter in a non-stick pan over low heat. Add condensed milk and stir.','Add milk powder and mix well. Cook on low 3-4 mins, stirring continuously.','Add Nutella, mix until smooth and dough-like.','Transfer to a greased tray, press flat to 1cm thickness.','Garnish with pistachios, press gently. Refrigerate 1 hour. Cut into squares.'],source:'pinterest',board:'Sweet Tooth'},
-  {id:501,name:'Corn & Avocado Salsa',time:15,type:'Salad',emoji:'🌽',ingredients:['500g corn cobs','2 avocados diced','1 red onion diced','1 punnet cherry tomatoes diced','handful coriander','juice of 1 lime','1.5 tbsp olive oil','pinch flaky sea salt'],tags:['fresh','quick','vegan'],steps:['Cook corn cobs in a pan with olive oil until golden on each side.','Cut corn off the cob into a large salad bowl.','Add diced avocado, red onion, cherry tomatoes and coriander.','Mix lime juice, olive oil and salt. Pour over salad and toss gently to combine.'],source:'pinterest',board:'Salads'},
-  {id:502,name:'Healthy Mango Salad',time:15,type:'Salad',emoji:'🥭',ingredients:['2 mangoes chopped','2 avocados chopped','2 red bell peppers chopped','1 red onion chopped','1 cucumber chopped','1/2 cup coriander','juice of 1 lime','1/4 tsp red chilli flakes','olive oil','salt'],tags:['fresh','tropical','no-cook'],steps:['Cut mangoes and avocado into bite-sized pieces.','Dice bell pepper, cucumber and red onion. Add to a large salad bowl with coriander.','Squeeze lime juice over the salad. Season with salt and chilli flakes.','Drizzle olive oil and toss well. Serve immediately or chill.'],source:'pinterest',board:'Salads'},
-  {id:503,name:'Tomato Cucumber Avocado with Mozzarella',time:20,type:'Salad',emoji:'🍅',ingredients:['1/2 lb red cherry tomatoes halved','1/2 lb yellow cherry tomatoes halved','2 avocados diced','1 cucumber sliced','1/3 cup red onion diced','8 oz small fresh mozzarella balls','1/4 cup basil pesto','1 tbsp lemon juice','salt and pepper'],tags:['mediterranean','fresh','no-cook'],steps:['Combine halved cherry tomatoes, diced avocado, sliced cucumber, red onion and mozzarella in a large bowl.','Mix basil pesto with lemon juice for the dressing.','Pour dressing over salad and toss gently. Season with salt and pepper. Serve immediately.'],source:'pinterest',board:'Salads'},
-  {id:504,name:'Asian Cucumber Salad',time:20,type:'Salad',emoji:'🥒',ingredients:['1 cucumber sliced','3/4 tsp salt','2 garlic cloves minced','1 tsp apple cider vinegar','1.5 tbsp jaggery syrup','1 tsp Korean chilli powder or regular','1 tsp chilli oil','1/2 tsp sesame oil','sesame seeds for garnish'],tags:['asian','spicy','quick'],steps:['Rinse cucumber and slice. Sprinkle salt, stir gently and chill 15 mins. Drain the salt water.','Mix garlic, vinegar, jaggery syrup, chilli powder, chilli oil and sesame oil until combined.','Pour over cucumber and toss well until evenly coated.','Top with sesame seeds. Serve immediately or chill 30 mins for more flavour.'],source:'pinterest',board:'Salads'},
-  {id:505,name:'Creamy Cucumber-Radish Salad',time:10,type:'Salad',emoji:'🥒',ingredients:['3 small cucumbers peeled and sliced','7-8 radishes thinly sliced','1 bunch scallions chopped','1 cup cottage cheese','salt and pepper','fresh dill optional'],tags:['creamy','quick','protein'],steps:['Peel and slice the cucumbers. Thinly slice the radishes. Chop the scallions.','Place all ingredients in a medium salad bowl. Add cottage cheese.','Season with salt and pepper. Stir everything together. Serve immediately.'],source:'pinterest',board:'Salads'},
-  {id:506,name:'Green Onion Salad with Eggs',time:10,type:'Salad',emoji:'🥚',ingredients:['2 bunches green onions chopped','1 large cucumber sliced','6 hard-boiled eggs chopped','2-3 tbsp yogurt','salt','fresh dill (optional)'],tags:['quick','protein','eggs'],steps:['Hard boil eggs, cool, peel and chop. Chop green onions and slice cucumber.','Combine onions, cucumber and eggs in a bowl. Add yogurt and mix gently.','Season with salt. Add fresh dill if using. Serve immediately.'],source:'pinterest',board:'Salads'},
-  {id:507,name:'Vegetarian Caesar Salad',time:15,type:'Salad',emoji:'🥗',ingredients:['2 heads romaine lettuce chopped','1 cup croutons','shaved parmesan cheese','For dressing: 2 tbsp mayo, 2 tbsp yogurt, 2 tbsp olive oil, 2 tbsp parmesan, 1 garlic clove, 1 tbsp lemon juice, 2 tsp Dijon mustard, salt and pepper'],tags:['classic','vegetarian','quick'],steps:['Make dressing: whisk mayo, yogurt, olive oil, parmesan, minced garlic, lemon juice, Dijon mustard, salt and pepper. Add water to reach drizzle consistency.','Wash and thoroughly dry romaine lettuce. Chop into bite-sized pieces.','Add lettuce to a large bowl. Sprinkle with parmesan and croutons.','Drizzle dressing and toss gently until evenly coated. Serve immediately.'],source:'pinterest',board:'Salads'},
-  {id:508,name:'Mango Cucumber Salad',time:10,type:'Salad',emoji:'🥭',ingredients:['2 mangoes peeled and diced','1 English cucumber diced','1/2 cup red onion diced','1/2 cup red bell pepper diced','juice of 1 lime','1 tbsp white wine vinegar','1 tsp red pepper flakes','fresh cilantro or mint optional'],tags:['tropical','vegan','no-cook'],steps:['Peel and dice mangoes. Chop cucumber, red onion and bell pepper.','Combine all in a large bowl. Squeeze lime juice, add white wine vinegar and red pepper flakes.','Toss to combine. Refrigerate 1 hour if time allows for best flavour.','Serve cold. Keeps in fridge up to 3 days.'],source:'pinterest',board:'Salads'},
-  {id:601,name:'Baba Ganoush (Eggplant Dip)',time:30,type:'Snack',emoji:'🍆',ingredients:['1-2 globe eggplants (about 2 lbs)','3 tbsp extra virgin olive oil','2-3 tbsp roasted tahini','1-2 garlic cloves finely chopped','1/2 tsp ground cumin','juice of 1 lemon','salt and cayenne pepper to taste','1 tbsp chopped parsley'],tags:['dip','middle-eastern','smoky'],steps:['Preheat oven to 200C. Cut eggplants in half lengthwise, poke a few holes, brush with olive oil.','Place cut-side down on a lined baking sheet. Roast 25-30 mins until skin is charred and flesh is very soft.','Let cool, then scoop out the flesh and discard the skin.','Blend or mash flesh with tahini, garlic, cumin, lemon juice, salt and cayenne until smooth.','Transfer to a bowl, drizzle with olive oil and garnish with parsley. Serve with pita or veggies.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:602,name:'Cilantro Lime Hummus',time:10,type:'Snack',emoji:'🫙',ingredients:['1 can chickpeas drained and rinsed','1/4 cup tahini','juice of 2 limes','1 cup fresh cilantro','2-3 garlic cloves','2 tbsp olive oil','1/4 tsp cumin','salt to taste','2-3 tbsp water to thin'],tags:['dip','hummus','quick'],steps:['Add chickpeas, tahini, lime juice, cilantro, garlic, olive oil, cumin and salt to a food processor.','Blend until smooth, scraping down the sides as needed.','Add water one tablespoon at a time to reach your desired consistency.','Taste and adjust — more lime, cilantro or salt as needed.','Transfer to a bowl, drizzle with olive oil and garnish with cilantro. Serve with veggies or pita.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:603,name:'Cilantro Lime Dressing',time:5,type:'Snack',emoji:'🥗',ingredients:['1 cup fresh cilantro packed','3 tbsp lime juice (about 2 limes)','2 tbsp olive oil','1 small garlic clove','1 tbsp water','1/2 tsp cumin','1/4 tsp salt','pinch of chilli flakes (optional)'],tags:['dressing','quick','vegan'],steps:['Add all ingredients to a blender or small food processor.','Blend until smooth and vibrant green — about 30 seconds.','Taste and adjust lime juice, salt or chilli flakes to your liking.','Store in an airtight jar in the fridge for up to 5 days. Shake before using.','Drizzle over salads, grain bowls, tacos or roasted veggies.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:604,name:'Creamy Avocado Cilantro Lime Dressing',time:5,type:'Snack',emoji:'🥑',ingredients:['1 ripe avocado','1/2 cup fresh cilantro','juice of 2 limes','1-2 garlic cloves','2-4 tbsp water to thin','salt and pepper to taste'],tags:['dressing','creamy','no-cook'],steps:['Add avocado, cilantro, lime juice and garlic to a blender or food processor.','Blend until smooth.','Add water one tablespoon at a time until you reach a pourable dressing consistency.','Season with salt and pepper to taste.','Store in fridge up to 3 days. Stir or shake before using. Great on salads, fajitas and as a dip.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:605,name:'Green Goddess Feta Dip',time:10,type:'Snack',emoji:'🌿',ingredients:['200g feta cheese crumbled','1 ripe avocado','1/2 cup fresh herbs (basil, parsley, chives, tarragon)','2 tbsp lemon juice','1 garlic clove','2 tbsp olive oil','salt and pepper to taste'],tags:['dip','feta','creamy'],steps:['Add feta, avocado, fresh herbs, lemon juice, garlic and olive oil to a food processor.','Blend until very smooth and creamy, scraping down the sides as needed.','Taste and adjust seasoning — add more lemon or salt as needed.','Transfer to a serving bowl. Drizzle with extra olive oil and garnish with fresh herbs.','Serve with crusty bread, pita chips, or fresh veggies for dipping.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:606,name:'Whipped Feta Dip',time:5,type:'Snack',emoji:'🧀',ingredients:['200g feta cheese crumbled','3 tbsp plain yogurt','1 tbsp olive oil','1 tbsp lemon juice','pinch of chilli flakes','black pepper to taste','honey and herbs for topping'],tags:['dip','feta','quick'],steps:['Add feta, yogurt, olive oil and lemon juice to a food processor.','Blend until very smooth and whipped — about 1-2 mins. Scrape down sides as needed.','Season with chilli flakes and black pepper to taste.','Transfer to a serving bowl. Drizzle with honey and olive oil, sprinkle chilli flakes and fresh herbs.','Serve with warm pita bread, crackers or fresh vegetables.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:607,name:'Japanese Ginger Salad Dressing',time:5,type:'Snack',emoji:'🫚',ingredients:['1/4 cup chopped white onion','2 tbsp fresh ginger grated','2 tbsp apple cider vinegar','2 tbsp coconut aminos or soy sauce','2 tbsp olive oil','1 tbsp sesame oil','1 tbsp lime juice','1 tsp jaggery syrup','salt to taste'],tags:['dressing','japanese','quick'],steps:['Add onion and ginger to a blender.','Add vinegar, coconut aminos, olive oil, sesame oil, lime juice and jaggery syrup.','Blend until smooth — about 30 seconds.','Taste and adjust — more ginger for heat, more lime for tang, more aminos for umami.','Store in fridge up to 1 week. Shake before using. Serve over salad greens or as a dipping sauce.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:608,name:'Basil Garlic Aioli',time:10,type:'Snack',emoji:'🌿',ingredients:['1/2 cup mayonnaise (or vegan mayo)','1/4 cup fresh basil leaves packed','2-3 garlic cloves','1 tbsp lemon juice','1 tbsp olive oil','salt and pepper to taste'],tags:['dip','aioli','garlic'],steps:['Add mayonnaise, basil, garlic, lemon juice and olive oil to a food processor or blender.','Blend until smooth and bright green — about 30 seconds.','Taste and adjust seasoning — more garlic, lemon or salt as needed.','Transfer to a bowl or jar.','Store in fridge up to 5 days. Use as a dip, sandwich spread or sauce over roasted veggies.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:609,name:'Beet Hummus',time:30,type:'Snack',emoji:'🫚',ingredients:['2 medium beets roasted or boiled','1 can chickpeas drained (simmered 15-20 mins until very soft)','1/4 tsp baking soda (added while simmering chickpeas)','3 tbsp tahini','2 garlic cloves','1 tsp cumin','1/2 tsp coriander','salt and pepper','2 tbsp olive oil','zest and juice of 1 lemon','zaatar and parsley for serving'],tags:['dip','beet','vibrant'],steps:['Simmer chickpeas with baking soda in water for 15-20 mins until very soft. Drain well.','Roast or boil beets until tender, then peel and roughly chop.','Add chickpeas, beets, tahini, garlic, cumin, coriander, salt, pepper and lemon zest and juice to a food processor.','Blend until very smooth — about 2-3 mins, scraping down the sides as needed.','Drizzle in olive oil with the processor running to emulsify.','Transfer to a bowl. Top with zaatar, parsley and a drizzle of olive oil. Serve with pita or veggies.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:610,name:'Pumpkin Seed Pesto (Nut-Free)',time:5,type:'Snack',emoji:'🌿',ingredients:['1 cup pumpkin seeds (toasted)','2 cups fresh basil packed','3 garlic cloves','2 tbsp lemon juice','1/4 cup olive oil','1/4 cup nutritional yeast or parmesan','1/2 tsp salt','2-4 tbsp water to thin'],tags:['sauce','nut-free','quick'],steps:['Toast pumpkin seeds in a dry pan over medium heat 3-4 mins until lightly golden. Let cool.','Add pumpkin seeds, basil, garlic, lemon juice and nutritional yeast to a food processor.','Pulse several times to break everything down.','With processor running, slowly drizzle in olive oil until combined.','Add water to reach desired consistency. Season with salt and more lemon to taste.','Use on pasta, sandwiches, salads, or roasted veggies. Keeps in fridge 5 days.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:611,name:'Tomato Peach Chutney',time:20,type:'Snack',emoji:'🍑',ingredients:['2 ripe tomatoes charred or roasted','2 peaches chopped','2 dried apricots chopped','2 dried red chillies','3 garlic cloves','1 inch ginger','1 tsp cumin seeds','1 tsp coriander powder','1/2 tsp chilli powder','2 tbsp oil','salt to taste','fresh coriander to garnish'],tags:['chutney','indian','fruity'],steps:['Char tomatoes directly over a gas flame or under a broiler until skin is blackened. Cool and peel.','Heat oil in a pan, add cumin seeds and let splutter.','Add garlic and ginger, saute 1 min. Add dried chillies, coriander powder and chilli powder.','Add charred tomatoes, peaches and apricots. Stir and cook 8-10 mins until jammy.','Season with salt. Let cool slightly then blend to a chunky or smooth chutney as preferred.','Serve with dosas, parathas, chaat or as a dipping sauce. Keeps in fridge for 5 days.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:612,name:'Chimichurri Sauce',time:5,type:'Snack',emoji:'🌿',ingredients:['1 cup fresh parsley packed','4 garlic cloves','1/4 cup fresh oregano leaves (or 1 tsp dried)','1/2 cup olive oil','3 tbsp red wine vinegar','1/2 tsp red chilli flakes','salt and black pepper to taste'],tags:['sauce','argentinian','quick'],steps:['Add parsley, garlic and oregano to a food processor. Pulse until finely chopped.','Transfer to a bowl. Stir in olive oil, red wine vinegar and chilli flakes.','Season generously with salt and black pepper.','Let rest at least 15 mins for flavours to meld.','Use as a sauce over roasted veggies, paneer, eggs or drizzle over salads. Keeps in fridge 1 week.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:613,name:'Thai Peanut Sauce',time:5,type:'Snack',emoji:'🥜',ingredients:['1/2 cup peanut butter','3 tbsp soy sauce or coconut aminos','2 tbsp lime juice','1 tbsp sesame oil','1 tbsp jaggery syrup or honey','1-2 tsp chilli garlic sauce or sriracha','1 garlic clove minced','1/2 inch fresh ginger grated','2-4 tbsp warm water to thin'],tags:['sauce','thai','quick'],steps:['Whisk together peanut butter, soy sauce, lime juice, sesame oil, jaggery syrup and chilli garlic sauce.','Add minced garlic and grated ginger.','Whisk in warm water one tablespoon at a time until you reach a smooth, pourable consistency.','Taste and adjust — more lime for tang, more jaggery for sweetness, more chilli for heat.','Use as a dipping sauce for spring rolls, dumplings, or drizzle over noodles and salads.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:614,name:'Creamy Cilantro Lime Sauce',time:5,type:'Snack',emoji:'🥑',ingredients:['1 cup fresh cilantro packed','1/2 cup yogurt or sour cream','2 garlic cloves','juice of 2 limes','1 jalapeno (seeds removed for less heat)','1/4 tsp cumin','1/2 tsp salt','2 tbsp olive oil'],tags:['sauce','creamy','quick'],steps:['Add all ingredients to a blender.','Blend until completely smooth and vibrant green.','Taste and adjust — more lime juice, salt or jalapeno as needed.','Store in fridge up to 5 days.','Drizzle over tacos, burrito bowls, salads, roasted veggies or use as a dip.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:615,name:'Chili Lime Tahini Sauce',time:5,type:'Snack',emoji:'🌶',ingredients:['1/4 cup tahini','3 tbsp lime juice (about 2 limes)','1 tbsp soy sauce or coconut aminos','1 tsp chilli garlic sauce or sriracha','1 garlic clove minced','2-4 tbsp water to thin','salt to taste'],tags:['sauce','tahini','quick'],steps:['Whisk tahini, lime juice, soy sauce, chilli garlic sauce and garlic together in a bowl.','Add water one tablespoon at a time, whisking, until you reach a smooth drizzleable consistency.','Taste and adjust — more lime, more chilli, or more tahini as needed.','Store in fridge up to 1 week in a sealed jar.','Drizzle over grain bowls, salads, roasted veggies, wraps or use as a dipping sauce.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:616,name:'Bang Bang Sauce (Vegan)',time:2,type:'Snack',emoji:'🔥',ingredients:['1/2 cup vegan mayo or regular mayo','3 tbsp sweet chilli sauce','1 tbsp sriracha (or more to taste)','1 tsp lime juice'],tags:['sauce','spicy','quick'],steps:['Add mayo, sweet chilli sauce, sriracha and lime juice to a bowl.','Whisk everything together until smooth and combined.','Taste and adjust heat level with more sriracha or sweetness with more sweet chilli sauce.','Serve immediately or refrigerate in a sealed jar for up to 2 weeks.','Use as a dipping sauce, drizzle over tacos, bowls, fritters or roasted veggies.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:617,name:'The Bomb Avocado Sauce',time:5,type:'Snack',emoji:'🥑',ingredients:['2 ripe avocados','2 jalapenos (seeds removed)','3-4 garlic cloves','1 cup fresh cilantro packed','3 tbsp extra virgin olive oil','juice of 1 lime','salt and pepper to taste','2-4 tbsp water to thin'],tags:['sauce','avocado','quick'],steps:['Add avocados, jalapenos, garlic and cilantro to a blender.','Add olive oil and lime juice.','Blend until smooth and creamy.','Add water one tablespoon at a time to reach desired consistency.','Season with salt and pepper to taste.','Use as a sauce, dip or dressing on everything — tacos, bowls, sandwiches, salads.'],source:'pinterest',board:'Dips & Dressings'},
-
-  {id:618,name:'Herbed Garlic Cheese Ball',time:10,type:'Snack',emoji:'🧀',ingredients:['1/2 cup cream cheese softened','1 cheese cube (processed or cheddar)','6-7 garlic cloves','1-2 tbsp onion finely chopped','2 tbsp spring onion chopped','1-2 tsp chilli flakes','1/2 tsp mixed herbs','salt and pepper to taste','olive oil for sauteing','Toppings: spring onion greens, chilli flakes, crushed walnuts'],tags:['snack','cheese','party'],steps:['Heat a little olive oil in a small pan. Saute garlic and onion until soft and golden, about 3-4 mins. Let cool.','In a bowl, mix softened cream cheese and grated/crumbled cheese cube until combined.','Add the cooled sauteed garlic and onion, spring onion, chilli flakes, mixed herbs, salt and pepper.','Mix well until everything is incorporated.','Shape the mixture into a ball using cling film or your hands. Refrigerate 30 mins to firm up.','Roll the cheese ball in toppings — spring onion greens, chilli flakes and crushed walnuts.','Serve with crackers, pita chips or veggies for dipping.'],source:'pinterest',board:'Dips & Dressings'},
-  {id:619,name:'Cucumber Kimchi (Oi Kimchi)',time:20,type:'Snack',emoji:'🥒',ingredients:['1 English cucumber cut into 3-inch spears','3 green onions cut into 3-inch pieces','1 garlic clove minced','2 tsp minced ginger','2 tsp Korean red pepper flakes (gochugaru)','1 tbsp soy sauce or coconut aminos','3 dashes sesame oil','6 tbsp white distilled vinegar','1/2 tsp kosher salt'],tags:['snack','korean','fermented'],steps:['Make the marinade: mix minced garlic, ginger, Korean red pepper flakes, soy sauce, sesame oil, vinegar and salt in a large bowl. Stir until well combined.','Cut cucumber into 3-inch spears. Cut green onions into 3-inch pieces.','Add cucumber and green onion to the marinade.','Gently toss for a full minute to coat everything evenly.','Cover and refrigerate for at least 1 hour before serving — the longer it sits, the better.','Serve as a side dish with rice, noodles or any Asian-inspired meal. Keeps up to 3 days in fridge.'],source:'pinterest',board:'Dips & Dressings'},  {id:701,name:'Vegetarian Lentil Soup',time:40,type:'Dinner',emoji:'🍲',ingredients:['1.5 cups green or brown lentils rinsed','1 onion diced','3 garlic cloves minced','2 carrots diced','2 celery stalks diced','1 can diced tomatoes','6 cups vegetable broth','1 tsp cumin','1 tsp marjoram','1/2 tsp thyme','1 tsp smoked paprika','2 tbsp olive oil','salt and pepper','fresh parsley to serve','juice of 1 lemon'],tags:['soup','lentil','meal-prep'],steps:['Heat olive oil in a large pot. Add onion and cook 5 mins until softened.','Add garlic, carrots and celery. Cook 3-4 mins more.','Add cumin, marjoram, thyme and smoked paprika. Stir and cook 1 min.','Add lentils, diced tomatoes and vegetable broth. Bring to a boil.','Reduce heat and simmer 25-30 mins until lentils are completely tender.','Season with salt, pepper and lemon juice. Garnish with fresh parsley.'],source:'pinterest',board:'Soups'},
-  {id:702,name:'Thai Coconut Soup (with Tofu & Mushrooms)',time:30,type:'Dinner',emoji:'🥥',ingredients:['1 can coconut milk','3 cups vegetable broth','200g firm tofu cubed','200g mushrooms sliced','2 tbsp Thai red curry paste','1 stalk lemongrass bruised','3 kaffir lime leaves','1 tbsp soy sauce or coconut aminos','1 tbsp lime juice','1 tsp jaggery syrup','fresh coriander and lime to serve'],tags:['soup','thai','coconut'],steps:['Heat a pot over medium heat. Add curry paste and stir 1 min until fragrant.','Add coconut milk, vegetable broth, lemongrass and kaffir lime leaves. Bring to a simmer.','Add mushrooms and tofu. Simmer 10-12 mins.','Season with soy sauce, lime juice and jaggery syrup. Taste and adjust.','Remove lemongrass and kaffir lime leaves before serving.','Ladle into bowls and top with fresh coriander and a squeeze of lime.'],source:'pinterest',board:'Soups'},
-  {id:703,name:'Roasted Tomato Basil Soup',time:55,type:'Dinner',emoji:'🍅',ingredients:['1.5 kg ripe tomatoes halved','1 whole head garlic','1 onion quartered','3 tbsp olive oil','1 cup fresh basil leaves','2 cups vegetable broth','1/2 tsp sugar or jaggery','salt and pepper','cream for serving (optional)'],tags:['soup','roasted','comforting'],steps:['Preheat oven to 200C. Place tomatoes, garlic head (top cut off) and onion on a baking tray.','Drizzle with olive oil and season generously with salt and pepper.','Roast 35-40 mins until tomatoes are caramelised and slightly charred.','Squeeze roasted garlic out of its skin into a blender.','Add roasted tomatoes, onion, fresh basil and vegetable broth. Blend until smooth.','Transfer to a pot, add jaggery, season and simmer 5 mins. Serve with a swirl of cream and crusty bread.'],source:'pinterest',board:'Soups'},
-  {id:704,name:'Cheddar Broccoli Potato Soup',time:40,type:'Dinner',emoji:'🥦',ingredients:['3 cups broccoli florets','2 medium potatoes peeled and diced','1 onion diced','3 garlic cloves minced','3 tbsp butter','3 tbsp flour','4 cups vegetable broth','1 cup milk or cream','2 cups grated cheddar cheese','1/4 tsp nutmeg','salt and pepper'],tags:['soup','cheesy','comfort'],steps:['Melt butter in a large pot. Sauté onion 4-5 mins, add garlic and cook 1 min more.','Stir in flour and cook 2 mins to form a roux.','Gradually pour in vegetable broth, whisking constantly to avoid lumps. Bring to a simmer.','Add potatoes and cook 10 mins until starting to soften.','Add broccoli and cook another 8-10 mins until both are tender.','Stir in milk, then gradually add cheddar. Season with nutmeg, salt and pepper. Do not boil once cheese is added.'],source:'pinterest',board:'Soups'},
-];
-
-// ── SUPABASE QUERIES ─────────────────────────────────────────────────────────
-function getWeekStart() {
-  const d = new Date();
-  d.setHours(0,0,0,0);
-  d.setDate(d.getDate() - d.getDay() + weekOffset * 7);
-  return d.toISOString().split('T')[0];
-}
-
-async function loadRecipes() {
-  showStatus('Loading your recipes...');
-  const { data, error } = await db.from('recipes').select('*');
-  if (error) {
-    showError('Could not load recipes: ' + error.message);
-    hideStatus();
-    return;
-  }
-  if (data && data.length > 0) {
-    recipes = data;
-  } else {
-    // First time — seed Supabase with all default recipes
-    showStatus('First time setup — saving your recipes...');
-    const { error: insertErr } = await db.from('recipes').insert(DEFAULT_RECIPES);
-    if (insertErr) {
-      showError('Could not seed recipes: ' + insertErr.message);
-    } else {
-      recipes = DEFAULT_RECIPES;
-    }
-  }
-  renderRecipes();
-  hideStatus();
-}
-
-async function loadMealPlan() {
-  const week = getWeekStart();
-  const { data, error } = await db.from('meal_plan').select('*').eq('week_start', week);
-  if (error) { showError('Could not load meal plan: ' + error.message); return; }
-  mealPlan = {};
-  if (data) {
-    data.forEach(row => {
-      if (!mealPlan[row.day_index]) mealPlan[row.day_index] = {};
-      mealPlan[row.day_index][row.meal_type] = row.recipe_data;
-    });
-  }
-  renderWeekGrid();
-  renderMealSlots();
-}
-
-async function saveMealSlot(dayIdx, mealType, recipe) {
-  const week = getWeekStart();
-  // Only pass recipe_id when it's a real small integer (saved recipes have ids 1-999)
-  const recipeId = (recipe && Number.isInteger(recipe.id) && recipe.id < 100000) ? recipe.id : null;
-  const { error } = await db.from('meal_plan').upsert(
-    { day_index: dayIdx, meal_type: mealType, recipe_id: recipeId, recipe_data: recipe, week_start: week },
-    { onConflict: 'day_index,meal_type,week_start' }
-  );
-  if (error) showError('Could not save meal: ' + error.message);
-}
-
-async function loadGroceries() {
-  const week = getWeekStart();
-  const { data, error } = await db.from('groceries').select('*').eq('week_start', week);
-  if (error) { showError('Could not load grocery list: ' + error.message); return; }
-  groceries = data || [];
-  renderGrocery();
-}
-
-async function persistGroceries() {
-  const week = getWeekStart();
-  await db.from('groceries').delete().eq('week_start', week);
-  if (groceries.length > 0) {
-    const rows = groceries.map(g => ({ name: g.name, checked: g.checked, count: g.count, week_start: week }));
-    const { error } = await db.from('groceries').insert(rows);
-    if (error) { showError('Could not save grocery list: ' + error.message); return; }
-    await loadGroceries();
-  } else {
-    renderGrocery();
-  }
-}
-
-async function upsertRecipe(recipe) {
-  const { error } = await db.from('recipes').upsert(recipe);
-  if (error) { showError('Could not save recipe: ' + error.message); return false; }
-  return true;
-}
-
-// ── UI FUNCTIONS ─────────────────────────────────────────────────────────────
-function navigate(screen, el) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('screen-' + screen).classList.add('active');
-  el.classList.add('active');
-  localStorage.setItem('rv_active_screen', screen);
-  if (screen === 'recipes') renderRecipes();
-  if (screen === 'grocery') { loadGroceries(); }
-}
-
-function switchHomeTab(tab, el) {
-  document.querySelectorAll('.tab-bar .tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('home-plan').style.display = tab === 'plan' ? 'block' : 'none';
-  document.getElementById('home-nutrition').style.display = tab === 'nutrition' ? 'block' : 'none';
-  document.getElementById('home-prep').style.display = tab === 'prep' ? 'block' : 'none';
-  if (tab === 'nutrition') {
-    const cached = localStorage.getItem('rv_nut_' + getWeekStart());
-    if (cached) { try { renderNutrition(JSON.parse(cached)); document.getElementById('nut-btn').textContent = '🔄 Refresh'; } catch(e) {} }
-  }
-  if (tab === 'prep') {
-    const cached = localStorage.getItem('rv_prep_' + getWeekStart());
-    if (cached) { try { const p = JSON.parse(cached); document.getElementById('prep-timeline-content').innerHTML = renderPrepHtml(p); document.getElementById('prep-btn').textContent = '🔄 Regenerate'; } catch(e) {} }
-  }
-}
-
-function renderWeekGrid() {
-  // Update week nav controls
-  const prevBtn = document.getElementById('prev-week-btn');
-  const weekLabel = document.getElementById('week-label');
-  if (prevBtn) {
-    prevBtn.disabled = weekOffset <= 0;
-    prevBtn.style.opacity = weekOffset <= 0 ? '0.3' : '1';
-    prevBtn.style.cursor = weekOffset <= 0 ? 'default' : 'pointer';
-  }
-  if (weekLabel) {
-    if (weekOffset === 0) weekLabel.textContent = 'This week';
-    else if (weekOffset === 1) weekLabel.textContent = 'Next week';
-    else {
-      const ws = new Date(today); ws.setDate(today.getDate() - todayIdx + weekOffset * 7);
-      const we = new Date(ws); we.setDate(ws.getDate() + 6);
-      const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      weekLabel.textContent = M[ws.getMonth()] + ' ' + ws.getDate() + ' – ' + M[we.getMonth()] + ' ' + we.getDate();
-    }
-  }
-
-  const grid = document.getElementById('week-grid');
-  grid.innerHTML = '';
-  DAYS.forEach((d, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - todayIdx + i + weekOffset * 7);
-    const hasMeals = mealPlan[i] && (mealPlan[i].breakfast || mealPlan[i].dinner);
-    const isToday = weekOffset === 0 && i === todayIdx;
-    const pill = document.createElement('button');
-    pill.className = 'day-pill' +
-      (i === selectedDay ? ' active' : '') +
-      (hasMeals ? ' has-meals' : '') +
-      (isToday && i !== selectedDay ? ' today' : '');
-    pill.innerHTML = '<span class="day-name">' + d + '</span><span class="day-num">' + date.getDate() + '</span><span class="dot"></span>';
-    pill.onclick = () => { selectedDay = i; renderWeekGrid(); renderMealSlots(); };
-    grid.appendChild(pill);
-  });
-}
-
-function renderMealSlots() {
-  const slots = document.getElementById('meal-slots');
-  document.getElementById('selected-day-label').textContent = DAYS[selectedDay] + "'s meals";
-  const day = mealPlan[selectedDay] || {};
-  const isWed = selectedDay === 2;
-  const isWeekend = selectedDay === 5 || selectedDay === 6;
-  const isRealMeal = m => m && m.source !== 'outside';
-  const hasRealMeal = isRealMeal(day.breakfast) || isRealMeal(day.dinner);
-  let html = '';
-
-  // Weekend with no real meals (empty or only outside-food markers) → cheat day banner
-  if (isWeekend && !hasRealMeal) {
-    html += '<div class="card-sm" style="background:var(--berry-light);border-color:var(--berry);text-align:center;padding:16px 14px;margin-bottom:10px">' +
-      '<div style="font-size:24px;margin-bottom:4px">🍽</div>' +
-      '<div style="font-size:13px;font-weight:500;color:var(--berry)">Outside food / Cheat day</div>' +
-      '<div style="font-size:11px;color:var(--text-muted);margin-top:3px">Tap a slot below to cook at home instead</div>' +
-    '</div>';
-    ['breakfast','dinner'].forEach(m => {
-      const icon = m === 'breakfast' ? '🌅' : '🌙';
-      html += '<div class="meal-slot" onclick="pickMeal(\'' + m + '\')">' +
-        '<div class="meal-icon" style="background:var(--berry-light)">' + icon + '</div>' +
-        '<div class="meal-info">' +
-          '<div class="meal-type">' + m.charAt(0).toUpperCase() + m.slice(1) + '</div>' +
-          '<div class="meal-name" style="color:var(--text-muted)">Cook at home instead?</div>' +
-        '</div>' +
-        '<div style="color:var(--text-muted);font-size:16px">+</div>' +
-      '</div>';
-    });
-    slots.innerHTML = html;
-    return;
-  }
-
-  // Weekday OR weekend with at least one meal planned — show normally
-  ['breakfast', 'dinner'].forEach(m => {
-    const meal = day[m];
-    const icon = m === 'breakfast' ? '🌅' : '🌙';
-    if (meal) {
-      // Filled slot: tap to view recipe, edit/delete icons to change
-      html += '<div class="meal-slot filled" onclick="showRecipeDetail(' + meal.id + ')" style="cursor:pointer">' +
-        '<div class="meal-icon">' + icon + '</div>' +
-        '<div class="meal-info">' +
-          '<div class="meal-type">' + m.charAt(0).toUpperCase() + m.slice(1) + '</div>' +
-          '<div class="meal-name">' + meal.name + '</div>' +
-          '<div class="meal-meta">⏱ ' + meal.time + ' mins</div>' +
-        '</div>' +
-        '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0" onclick="event.stopPropagation()">' +
-          '<button onclick="pickMeal(\'' + m + '\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 7px;cursor:pointer;font-size:13px" title="Change recipe">✏️</button>' +
-          '<button onclick="removeMeal(\'' + m + '\')" style="background:none;border:1px solid #FFCDD2;border-radius:6px;padding:4px 7px;cursor:pointer;font-size:13px" title="Remove">🗑</button>' +
-        '</div>' +
-      '</div>';
-    } else {
-      // Empty slot: tap to pick
-      html += '<div class="meal-slot" onclick="pickMeal(\'' + m + '\')">' +
-        '<div class="meal-icon">' + icon + '</div>' +
-        '<div class="meal-info">' +
-          '<div class="meal-type">' + m.charAt(0).toUpperCase() + m.slice(1) + '</div>' +
-          '<div class="meal-name">Tap to plan ' + m + '</div>' +
-        '</div>' +
-        '<div style="color:var(--text-muted);font-size:16px">+</div>' +
-      '</div>';
-    }
-  });
-  if (isWed) {
-    html += '<div class="card-sm" style="background:#F5F5F5;border-style:dashed"><span style="font-size:11px;color:var(--text-muted)">🏢 Wednesday — lunch at work!</span></div>';
-  }
-  slots.innerHTML = html;
-}
-
-let pickingMealType = null;
-let _pendingNewRecipe = null;
-let _pickType = null;
-
-function _suitableRecipes(type, query) {
-  const q = (query || '').toLowerCase().trim();
-  return recipes.filter(r => {
-    const typeOk = type === 'breakfast' ? (r.type === 'Breakfast' || r.type === 'Both') : (r.type === 'Dinner' || r.type === 'Both');
-    if (!typeOk) return false;
-    if (!q) return true;
-    const ing = (r.ingredients || []).join(' ').toLowerCase();
-    return r.name.toLowerCase().includes(q) || ing.includes(q);
-  });
-}
-
-function _renderPickList(type, query) {
-  const q = (query || '').trim();
-  const suitable = _suitableRecipes(type, q);
-  const cardsHtml = suitable.map(r => {
-    const igSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>';
-    const ptSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>';
-    const badge = r.source === 'pinterest' ? '<span class="source-badge src-pinterest">' + ptSvg + '</span>' : r.source === 'instagram' ? '<span class="source-badge src-instagram">' + igSvg + '</span>' :
-                  r.source === 'ai' ? '<span class="source-badge src-ai">✨</span>' : '';
-    return '<div class="recipe-card" onclick="assignMeal(' + r.id + ')">' +
-      '<div class="recipe-emoji">' + (r.emoji || '🍽') + '</div>' +
-      '<div class="recipe-info">' +
-        '<div class="recipe-name">' + r.name + '</div>' +
-        '<div class="recipe-meta-row"><span>⏱ ' + r.time + 'm</span>' + badge + '</div>' +
-        '<div class="recipe-tags">' + (r.tags || []).slice(0,2).map(t => '<span class="recipe-tag">' + t + '</span>').join('') + '</div>' +
-      '</div></div>';
-  }).join('');
-
-  const noMatch = suitable.length === 0 && q;
-  const qLabel = q ? ' for <em>' + q + '</em>' : '';
-  const createSection =
-    '<div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">' +
-      (noMatch
-        ? '<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;text-align:center">No recipes in your vault match <strong>' + q + '</strong>.</div>'
-        : '<div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Not in the list? Create one:</div>') +
-      '<div style="display:flex;gap:7px">' +
-        '<button class="btn btn-primary btn-full btn-sm" id="pick-gen-btn" onclick="generateAndAssign()">✨ Generate' + qLabel + '</button>' +
-        '<button class="btn btn-outline btn-full btn-sm" onclick="openAddModal();closeModal(\'suggest-modal\')">+ Add manually</button>' +
-      '</div>' +
-      '<div id="pick-gen-result"></div>' +
-    '</div>';
-
-  return (noMatch ? '' : '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Choose a ' + type + (q ? ' matching <em>' + q + '</em>' : '') + ' (' + suitable.length + '):</div>' + cardsHtml) + createSection;
-}
-
-function pickMeal(type) {
-  pickingMealType = type;
-  _pickType = type;
-  _pendingNewRecipe = null;
-  const label = type.charAt(0).toUpperCase() + type.slice(1);
-  document.querySelector('#suggest-modal .modal-title').textContent = label + ' for ' + DAYS[selectedDay];
-  document.getElementById('suggestions-content').innerHTML =
-    '<input class="input" id="pick-search" placeholder="Search by name or ingredient..." oninput="filterPickCards(this.value)" style="margin-bottom:10px"/>' +
-    '<div id="pick-body">' + _renderPickList(type, '') + '</div>';
-  document.getElementById('suggest-btn').style.display = 'none';
-  document.getElementById('suggest-modal').classList.add('open');
-}
-
-function filterPickCards(query) {
-  const el = document.getElementById('pick-body');
-  if (el && _pickType) el.innerHTML = _renderPickList(_pickType, query);
-}
-
-async function generateAndAssign() {
-  const searchEl = document.getElementById('pick-search');
-  const ing = searchEl ? searchEl.value.trim() : '';
-  if (!ing) { showError('Type an ingredient or dish name in the search box first'); return; }
-  const btn = document.getElementById('pick-gen-btn');
-  btn.innerHTML = '<span class="spinner"></span> Creating...';
-  btn.disabled = true;
-  const mealLabel = _pickType === 'breakfast' ? 'Breakfast' : 'Dinner';
-  const prompt = 'Create a vegetarian recipe (eggs OK, no sugar) for ' + mealLabel + ' using: ' + ing + '. Return ONLY JSON: {"name":"...","time":25,"type":"' + mealLabel + '","emoji":"🍛","tags":["tag1"],"ingredients":["qty ingredient"],"steps":["Step 1","Step 2"]}';
-  try {
-    const text = await callAI(prompt, 900);
-    const data = parseAIJson(text);
-    _pendingNewRecipe = {
-      id: Date.now(),
-      name: data.name, time: parseInt(data.time) || 30,
-      type: data.type || mealLabel, emoji: data.emoji || '🍽',
-      tags: data.tags || [], ingredients: data.ingredients || [],
-      steps: data.steps || [], source: 'ai', board: null
-    };
-    const r = _pendingNewRecipe;
-    const el = document.getElementById('pick-gen-result');
-    if (el) el.innerHTML =
-      '<div style="background:var(--leaf-light);border:1px solid var(--leaf);border-radius:var(--radius-sm);padding:11px;margin-top:10px">' +
-        '<div style="font-size:14px;font-weight:500;margin-bottom:3px">' + r.emoji + ' ' + r.name + '</div>' +
-        '<div style="font-size:11px;color:var(--text-muted);margin-bottom:5px">⏱ ' + r.time + ' mins · ' + r.type + '</div>' +
-        '<div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">' + r.ingredients.slice(0,5).join(', ') + (r.ingredients.length > 5 ? '…' : '') + '</div>' +
-        '<button class="btn btn-leaf btn-full btn-sm" onclick="saveAndAssign()">💾 Save to vault &amp; plan for ' + DAYS[selectedDay] + '</button>' +
-      '</div>';
-  } catch(e) {
-    showError('AI unavailable — no matching recipes found in vault');
-  }
-  if (btn) { btn.innerHTML = '✨ Generate'; btn.disabled = false; }
-}
-
-async function saveAndAssign() {
-  if (!_pendingNewRecipe) return;
-  const recipe = _pendingNewRecipe;
-  const ok = await upsertRecipe(recipe);
-  if (!ok) return;
-  recipes.push(recipe);
-  renderRecipes();
-  if (!mealPlan[selectedDay]) mealPlan[selectedDay] = {};
-  mealPlan[selectedDay][pickingMealType] = recipe;
-  await saveMealSlot(selectedDay, pickingMealType, recipe);
-  closeModal('suggest-modal');
-  renderWeekGrid();
-  renderMealSlots();
-  showStatus('Recipe saved and planned for ' + DAYS[selectedDay] + '!');
-  _pendingNewRecipe = null;
-}
-
-async function assignMeal(id) {
-  const r = recipes.find(x => x.id === id);
-  if (!mealPlan[selectedDay]) mealPlan[selectedDay] = {};
-  mealPlan[selectedDay][pickingMealType] = r;
-  await saveMealSlot(selectedDay, pickingMealType, r);
-  closeModal('suggest-modal');
-  renderWeekGrid();
-  renderMealSlots();
-}
-
-async function removeMeal(mealType) {
-  if (!mealPlan[selectedDay]) return;
-  mealPlan[selectedDay][mealType] = null;
-  await saveMealSlot(selectedDay, mealType, null);
-  renderWeekGrid();
-  renderMealSlots();
-}
-
-async function changeWeek(delta) {
-  const newOffset = weekOffset + delta;
-  if (newOffset < 0) return;
-  weekOffset = newOffset;
-  selectedDay = weekOffset === 0 ? todayIdx : 0;
-  await loadMealPlan();
-  // Also refresh groceries if that screen is visible
-  const groceryScreen = document.getElementById('screen-grocery');
-  if (groceryScreen && groceryScreen.classList.contains('active')) await loadGroceries();
-}
-
-function openSuggestModal() {
-  document.getElementById('suggestions-content').innerHTML = '<div style="text-align:center;padding:18px 0;color:var(--text-muted);font-size:13px">Vegetarian · Eggs OK · No sugar · Inspired by your saves</div>';
-  document.getElementById('suggest-btn').style.display = '';
-  document.getElementById('suggest-btn').textContent = 'Get suggestions for this day';
-  document.getElementById('suggest-modal').classList.add('open');
-}
-
-let aiSuggestions = [];
-async function getSuggestions() {
-  aiSuggestions = [];
-  const btn = document.getElementById('suggest-btn');
-  btn.innerHTML = '<span class="spinner"></span> Getting suggestions...';
-  btn.disabled = true;
-
-  const prompt = 'Generate 1 breakfast and 1 dinner recipe for a vegetarian home cook. Profile: eggs OK, no meat, no refined sugar (jaggery/dates/honey OK), Indian-rooted but open to global, cooks fresh daily under 30 mins. Be creative. Return JSON only: {"suggestions":[{"meal":"Breakfast","name":"recipe name","emoji":"single emoji","time":15,"reason":"one short sentence"},{"meal":"Dinner","name":"recipe name","emoji":"single emoji","time":25,"reason":"one short sentence"}]}';
-
-  try {
-    const data = parseAIJson(await callAI(prompt, 400));
-    const suggestions = data.suggestions || [];
-    if (!suggestions.length) throw new Error('empty');
-
-    let html = '<div class="ai-tip">✨ <strong>AI suggestions for ' + DAYS[selectedDay] + '</strong></div>';
-    suggestions.forEach(s => {
-      const idx = aiSuggestions.length;
-      const entry = { r: { id: 'ai_' + Date.now() + idx, name: s.name, emoji: s.emoji || '🍽', time: s.time || 25, type: s.meal, tags: [], ingredients: [], steps: [], source: 'ai', board: null }, type: s.meal, reason: s.reason };
-      aiSuggestions.push(entry);
-      html += '<div class="ai-card">' +
-        '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">' +
-          '<span style="font-size:20px">' + (s.emoji || '🍽') + '</span>' +
-          '<div><strong style="font-size:13px">' + s.name + '</strong>' +
-          '<div style="font-size:10px;color:var(--text-muted)">' + s.meal + ' · ⏱ ' + (s.time || 25) + 'm</div></div>' +
-        '</div>' +
-        (s.reason ? '<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;line-height:1.4">' + s.reason + '</div>' : '') +
-        '<button class="btn btn-primary btn-sm btn-full" onclick="addAiRecipeStored(' + idx + ',\'' + s.meal + '\')">+ Plan for ' + DAYS[selectedDay] + '</button>' +
-      '</div>';
-    });
-    document.getElementById('suggestions-content').innerHTML = html;
-    btn.textContent = '🔀 New suggestions';
-    btn.disabled = false;
-  } catch(e) {
-    if (e.isRateLimit) {
-      document.getElementById('suggestions-content').innerHTML =
-        '<div class="ai-tip" style="background:#FEF8EE;border-color:#F0C96A;text-align:center">' +
-        '⏱ <strong>Too many requests</strong><br/><span style="font-size:11px;color:var(--text-muted)">Gemini free tier allows 15 requests/min.<br/>Wait a moment and try again.</span></div>';
-      btn.textContent = '🔄 Try again';
-      btn.disabled = false;
-      return;
-    }
-    const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-    const bfast = shuffle(recipes.filter(r => r.type === 'Breakfast' || r.type === 'Both'))[0];
-    const dinner = shuffle(recipes.filter(r => r.type === 'Dinner' || r.type === 'Both'))[0];
-    let html = '<div class="ai-tip">💡 AI unavailable — from your vault</div>';
-    [{ r: bfast, type: 'Breakfast' }, { r: dinner, type: 'Dinner' }].filter(e => e.r).forEach(entry => {
-      const idx = aiSuggestions.length;
-      aiSuggestions.push(entry);
-      html += '<div class="ai-card">' +
-        '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">' +
-          '<span style="font-size:20px">' + (entry.r.emoji || '🍽') + '</span>' +
-          '<div><strong style="font-size:13px">' + entry.r.name + '</strong>' +
-          '<div style="font-size:10px;color:var(--text-muted)">' + entry.type + ' · ⏱ ' + entry.r.time + 'm</div></div>' +
-        '</div>' +
-        '<button class="btn btn-primary btn-sm btn-full" onclick="addAiRecipeStored(' + idx + ',\'' + entry.type + '\')">+ Plan for ' + DAYS[selectedDay] + '</button>' +
-      '</div>';
-    });
-    document.getElementById('suggestions-content').innerHTML = html;
-    btn.textContent = '🔀 New suggestions';
-    btn.disabled = false;
-  }
-}
-
-async function addAiRecipe(r, type) {
-  const recipe = { id: Date.now(), name: r.name, time: r.time, type: type, emoji: r.emoji, ingredients: [], tags: r.tags || [], steps: [], source: 'ai', board: null };
-  const ok = await upsertRecipe(recipe);
-  if (ok) {
-    recipes.push(recipe);
-    if (!mealPlan[selectedDay]) mealPlan[selectedDay] = {};
-    mealPlan[selectedDay][type.toLowerCase()] = recipe;
-    await saveMealSlot(selectedDay, type.toLowerCase(), recipe);
-    closeModal('suggest-modal');
-    renderWeekGrid();
-    renderMealSlots();
-  }
-}
-
-async function addAiRecipeStored(idx, type) {
-  const entry = aiSuggestions[idx];
-  if (!entry) return;
-  if (!mealPlan[selectedDay]) mealPlan[selectedDay] = {};
-  mealPlan[selectedDay][type.toLowerCase()] = entry.r;
-  await saveMealSlot(selectedDay, type.toLowerCase(), entry.r);
-  closeModal('suggest-modal');
-  renderWeekGrid();
-  renderMealSlots();
-}
-function estimateNutritionLocally(meals) {
-  const NUT = {
-    breakfast: { protein: 13, carbs: 55, fat: 11, calories: 375 },
-    dinner:    { protein: 19, carbs: 65, fat: 14, calories: 470 }
-  };
-  const dayMap = {};
-  meals.forEach(m => {
-    if (!dayMap[m.day]) dayMap[m.day] = { day: m.day, protein: 0, carbs: 0, fat: 0, calories: 0 };
-    const n = NUT[m.meal] || NUT.dinner;
-    dayMap[m.day].protein  += n.protein;
-    dayMap[m.day].carbs    += n.carbs;
-    dayMap[m.day].fat      += n.fat;
-    dayMap[m.day].calories += n.calories;
-  });
-  const days = Object.values(dayMap);
-  const c = days.length || 1;
-  return {
-    protein_g: Math.round(days.reduce((s,d)=>s+d.protein,0)/c),
-    carbs_g:   Math.round(days.reduce((s,d)=>s+d.carbs,0)/c),
-    fat_g:     Math.round(days.reduce((s,d)=>s+d.fat,0)/c),
-    calories:  Math.round(days.reduce((s,d)=>s+d.calories,0)/c),
-    balance_note: 'Estimated values based on typical vegetarian meal composition.',
-    days: days,
-    isEstimate: true
-  };
-}
-
-// Target macros for Drashti (vegetarian, solo, active)
-const NUT_TARGETS = { protein: 65, carbs: 200, fat: 55, calories: 1600 };
-
-const PROTEIN_BOOSTERS = [
-  { name: 'Greek yogurt',         amount: '1 cup (150g)',  protein: 17, note: 'Add as a snack or breakfast topping' },
-  { name: 'Boiled eggs',          amount: '2 eggs',        protein: 12, note: 'Quick snack — eggs OK in your diet' },
-  { name: 'Cottage cheese (paneer)', amount: '100g',       protein: 18, note: 'Add to any sabzi or eat with fruit' },
-  { name: 'Roasted chickpeas',    amount: '½ cup',         protein: 10, note: 'Great crunchy snack with chaat masala' },
-  { name: 'Protein smoothie',     amount: '1 scoop protein powder + milk', protein: 25, note: 'Your insta protein powder recipe — blend with banana, milk, dates' },
-  { name: 'Moong dal chilla',     amount: '2 chillas',     protein: 14, note: 'Quick 15 min — already in your recipe vault!' },
-  { name: 'Peanut butter',        amount: '2 tbsp on toast', protein: 8, note: 'Easy mid-morning snack' },
-  { name: 'Edamame / soybeans',   amount: '½ cup boiled',  protein: 11, note: 'Toss with salt & lemon for a quick snack' },
-];
-
-function getBalanceSuggestions(parsed) {
-  const gap = { protein: NUT_TARGETS.protein - parsed.protein_g, calories: NUT_TARGETS.calories - parsed.calories };
-  const suggestions = [];
-
-  if (gap.protein > 10) {
-    // Sort boosters by how much they close the gap without overshooting
-    const boosters = PROTEIN_BOOSTERS
-      .filter(b => b.protein <= gap.protein + 10)
-      .sort((a,b) => Math.abs(a.protein - gap.protein) - Math.abs(b.protein - gap.protein))
-      .slice(0, 3);
-    suggestions.push({ type: 'protein', gap: gap.protein, boosters });
-  }
-  if (parsed.calories < 1200) suggestions.push({ type: 'calories', gap: Math.round(NUT_TARGETS.calories - parsed.calories) });
-  if (parsed.carbs_g > 250) suggestions.push({ type: 'carbs' });
-  return suggestions;
-}
-
-function renderNutrition(parsed) {
-  const maxP=100, maxC=300, maxF=80, maxCal=2200;
-  // Colour bars red if below target
-  const barColour = (val, target) => val < target * 0.7 ? 'var(--saffron)' : val < target ? 'var(--turmeric)' : 'var(--leaf)';
-  const pb = document.getElementById('bar-protein'); pb.style.width = Math.min(100, parsed.protein_g/maxP*100)+'%'; pb.style.background = barColour(parsed.protein_g, NUT_TARGETS.protein);
-  document.getElementById('bar-carbs').style.width   = Math.min(100, parsed.carbs_g/maxC*100)+'%';
-  document.getElementById('bar-fat').style.width     = Math.min(100, parsed.fat_g/maxF*100)+'%';
-  document.getElementById('bar-cal').style.width     = Math.min(100, parsed.calories/maxCal*100)+'%';
-  document.getElementById('val-protein').textContent = parsed.protein_g + 'g';
-  document.getElementById('val-carbs').textContent   = parsed.carbs_g   + 'g';
-  document.getElementById('val-fat').textContent     = parsed.fat_g     + 'g';
-  document.getElementById('val-cal').textContent     = parsed.calories;
-
-  let breakdown = '';
-  if (parsed.isEstimate) breakdown += '<div class="ai-tip" style="background:#FEF8EE;border:1px solid #F0C96A">📊 <strong>Estimated</strong> — approximate values based on meal types.</div>';
-  if (parsed.balance_note && !parsed.isEstimate) breakdown += '<div class="ai-tip">🧠 ' + parsed.balance_note + '</div>';
-
-  // Balance suggestions
-  const suggestions = getBalanceSuggestions(parsed);
-  suggestions.forEach(s => {
-    if (s.type === 'protein') {
-      breakdown += '<div class="section-label" style="color:var(--saffron-dark)">⚡ Boost your protein (+' + s.gap + 'g needed)</div>';
-      breakdown += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Your meals give ' + parsed.protein_g + 'g — target is ~' + NUT_TARGETS.protein + 'g. Add any of these on the side:</div>';
-      s.boosters.forEach(b => {
-        breakdown += '<div class="card-sm" style="padding:10px 12px;margin-bottom:7px;border-left:3px solid var(--leaf)">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">' +
-            '<div style="font-size:13px;font-weight:500">' + b.name + '</div>' +
-            '<span class="chip-green" style="font-size:11px;font-weight:600">+' + b.protein + 'g protein</span>' +
-          '</div>' +
-          '<div style="font-size:11px;color:var(--text-muted)">' + b.amount + ' — ' + b.note + '</div>' +
-        '</div>';
-      });
-    }
-    if (s.type === 'calories') {
-      breakdown += '<div class="ai-tip" style="background:#FEF0E6;border:1px solid #F0C09A">🔥 Only ' + parsed.calories + ' kcal — add a hearty snack (+' + s.gap + ' kcal needed). Try a moong dal chilla or peanut butter toast.</div>';
-    }
-    if (s.type === 'carbs') {
-      breakdown += '<div class="ai-tip" style="background:#FEF0E6;border:1px solid #F0C09A">🌾 Carbs are high (' + parsed.carbs_g + 'g). Try swapping rice for extra dal or a salad one day.</div>';
-    }
-  });
-
-  if (parsed.days && parsed.days.length) {
-    breakdown += '<div class="section-label">Day by day</div>';
-    parsed.days.forEach(d => {
-      const lowP = d.protein < NUT_TARGETS.protein * 0.6;
-      breakdown += '<div class="card-sm" style="padding:9px 11px' + (lowP ? ';border-left:3px solid var(--saffron)' : '') + '">' +
-        '<div style="display:flex;justify-content:space-between"><div style="font-size:13px;font-weight:500">' + d.day + (lowP ? ' <span style="font-size:10px;color:var(--saffron-dark)">↑ add protein</span>' : '') + '</div><div style="font-size:11px;color:var(--text-muted)">' + d.calories + ' kcal</div></div>' +
-        '<div style="display:flex;gap:8px;margin-top:5px"><span class="chip-green" style="font-size:10px">P: ' + d.protein + 'g</span><span class="chip-yellow" style="font-size:10px">C: ' + d.carbs + 'g</span><span class="chip" style="font-size:10px">F: ' + d.fat + 'g</span></div>' +
-      '</div>';
-    });
-  }
-  document.getElementById('nut-breakdown').innerHTML = breakdown;
-}
-
-async function analyseNutrition() {
-  const btn = document.getElementById('nut-btn');
-  btn.innerHTML = '<span class="spinner"></span> Analysing...';
-  btn.disabled = true;
-  const meals = [];
-  Object.entries(mealPlan).forEach(([dayIdx, day]) => {
-    if (day.breakfast && day.breakfast.source !== 'outside') meals.push({ day: DAYS[dayIdx], meal: 'breakfast', name: day.breakfast.name });
-    if (day.dinner   && day.dinner.source   !== 'outside') meals.push({ day: DAYS[dayIdx], meal: 'dinner',    name: day.dinner.name });
-  });
-  if (!meals.length) {
-    btn.textContent = "🔍 Analyse this week's meals";
-    btn.disabled = false;
-    document.getElementById('nut-breakdown').innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No meals planned yet.</div>';
-    return;
-  }
-  try {
-    const nutPrompt = 'Estimate nutrition for these vegetarian meals (no sugar, solo): ' + meals.map(m => m.day + ' ' + m.meal + ': ' + m.name).join(', ') + '. Per-day averages. JSON only: {"protein_g":45,"carbs_g":180,"fat_g":35,"calories":1400,"balance_note":"...","days":[{"day":"Mon","protein":40,"carbs":170,"fat":30,"calories":1300}]}';
-    const rawText2 = await callAI(nutPrompt, 1200);
-    const nutData = parseAIJson(rawText2);
-    renderNutrition(nutData);
-    localStorage.setItem('rv_nut_' + getWeekStart(), JSON.stringify(nutData));
-    btn.textContent = '🔄 Refresh';
-  } catch(e) {
-    const nutData = estimateNutritionLocally(meals);
-    renderNutrition(nutData);
-    localStorage.setItem('rv_nut_' + getWeekStart(), JSON.stringify(nutData));
-    btn.textContent = '🔄 Refresh';
-  }
-  btn.disabled = false;
-}
-
-function buildPrepTimelineLocally(meals) {
-  const NOISE = new Set(['fresh','frozen','cooked','dried','raw','ripe','hot','warm','whole','large','medium','small','extra','firm','soaked','boiled','roasted','halved','diced','chopped','sliced','grated','minced','crushed','peeled','seeded','optional','or','and','to','for','of','a','an','the']);
-
-  function ingName(ing) {
-    // strip leading quantity + unit
-    let s = ing.replace(/^[\d\s\/.]+(?:cups?|tbsp?|tsp?|g|kg|oz|lb|ml|bunch(?:es)?|cloves?|cans?|medium|large|small|inch|handful|pinch|sprigs?|stalks?)\s*/gi, '').trim();
-    // strip trailing prep notes
-    s = s.replace(/\s*[\(,].*$/,'').replace(/\s*(chopped|diced|sliced|grated|minced|crushed|peeled|soaked|boiled|roasted|optional|to taste|for serving|for garnish|as needed|overnight).*/gi,'').trim();
-    // keep up to 2 meaningful words
-    const words = s.split(/\s+/).filter(w => w.length > 1 && !NOISE.has(w.toLowerCase()));
-    return words.slice(0,2).join(' ').toLowerCase();
-  }
-
-  // Count shared ingredients across recipes
-  const ingCount = {};
-  meals.forEach(m => {
-    const r = recipes.find(x => x.name === m.name);
-    if (!r || !r.ingredients) return;
-    const seen = new Set();
-    r.ingredients.forEach(ing => {
-      const key = ingName(ing);
-      if (key.length > 2 && !seen.has(key)) { seen.add(key); ingCount[key] = (ingCount[key] || 0) + 1; }
-    });
-  });
-  const shared = Object.entries(ingCount).filter(([,v]) => v > 1).map(([k]) => k);
-  const chopable = shared.filter(k => /onion|tomato|pepper|garlic|ginger|carrot|celery|cucumber|coriander|spinach|paneer/.test(k));
-  const measureable = shared.filter(k => !chopable.includes(k)).slice(0,3);
-
-  const tips = [];
-  if (chopable.length) tips.push({ type: 'batch', title: 'Batch-chop: ' + chopable.slice(0,3).join(', '), detail: 'Used in multiple meals this week. Chop together on Sunday and refrigerate in separate containers (keeps 3 days).', saves: '10–15 min on each cook day' });
-  else if (measureable.length) tips.push({ type: 'batch', title: 'Pre-measure spices & ingredients', detail: measureable.join(', ') + ' appear in multiple recipes — portion them into small bowls or bags on Sunday.', saves: '5–10 min per meal' });
-
-  // Meals that need soaking
-  const needsSoak = meals.filter(m => { const r = recipes.find(x => x.name === m.name); return r && r.ingredients && r.ingredients.some(i => /overnight|soaked? [\d]|rajma|chickpea|chana/i.test(i)); });
-  if (needsSoak.length) tips.push({ type: 'reuse', title: 'Soak overnight: ' + needsSoak.slice(0,2).map(m=>m.name).join(' & '), detail: 'These recipes use soaked legumes — put them in water Saturday evening so they\'re ready Sunday/Monday.', saves: '30–60 min cook time' });
-
-  // Slow meals for double-cooking
-  const slow = meals.filter(m => (m.time||0) > 25 && !needsSoak.find(n=>n.name===m.name));
-  if (slow.length) tips.push({ type: 'reuse', title: 'Double-batch: ' + slow.slice(0,2).map(m=>m.name).join(' & '), detail: 'These take 25+ min. Cook a larger portion on the weekend and refrigerate — reheats in 5 min on busy weeknights.', saves: 'One full cook session mid-week' });
-
-  // Build specific Sunday tasks
-  const tasks = [];
-  if (needsSoak.length) tasks.push({ name: 'Saturday night: soak ' + needsSoak.slice(0,2).map(m=>m.name.split(' ')[0]).join(' & '), detail: 'Cover with plenty of water in a bowl. Leave overnight at room temperature.', time_mins: 5 });
-  if (chopable.length) tasks.push({ name: 'Chop & store: ' + chopable.slice(0,3).join(', '), detail: 'Dice, mince or slice each. Store in separate airtight containers. Keeps fresh in fridge for 3 days.', time_mins: 20 });
-  slow.slice(0,2).forEach(m => {
-    const r = recipes.find(x => x.name === m.name);
-    const firstStep = r && r.steps && r.steps[0] ? r.steps[0].slice(0,90) + (r.steps[0].length>90?'…':'') : 'Follow the recipe steps — store extra in fridge.';
-    tasks.push({ name: 'Cook & store extra: ' + m.name, detail: firstStep, time_mins: m.time || 30 });
-  });
-
-  return { tips, schedule: tasks.length ? [{ day: 'Sunday', tasks }] : [], isEstimate: true };
-}
-
-function renderPrepHtml(parsed) {
-  let html = '';
-  if (parsed.isEstimate) html += '<div class="ai-tip" style="background:#FEF8EE;border:1px solid #F0C96A">📋 <strong>Smart estimate</strong> — based on your planned recipes.</div>';
-  if (parsed.tips && parsed.tips.length) {
-    html += '<div class="section-label">Smart tips</div>';
-    parsed.tips.forEach(t => {
-      html += '<div class="prep-task ' + t.type + '" style="margin-bottom:7px"><div class="prep-task-name">' + (t.type === 'batch' ? '🔁' : '♻️') + ' ' + t.title + '</div><div class="prep-task-detail">' + t.detail + '</div>' + (t.saves ? '<div style="margin-top:4px;font-size:10px;color:var(--leaf);font-weight:500">⏱ Saves: ' + t.saves + '</div>' : '') + '</div>';
-    });
-  }
-  if (parsed.schedule && parsed.schedule.length) {
-    html += '<div class="section-label">Day-by-day schedule</div>';
-    parsed.schedule.forEach(s => {
-      if (!s.tasks || !s.tasks.length) return;
-      html += '<div class="prep-day-header">' + s.day + '</div>';
-      s.tasks.forEach(t => {
-        html += '<div class="prep-task" style="margin-left:20px"><div class="prep-task-name">' + t.name + ' <span style="font-size:10px;color:var(--text-muted)">~' + t.time_mins + ' min</span></div><div class="prep-task-detail">' + t.detail + '</div></div>';
-      });
-    });
-  }
-  return html || '<div style="font-size:12px;color:var(--text-muted)">All quick meals — no batch prep needed!</div>';
-}
-
-async function generatePrepTimeline() {
-  const btn = document.getElementById('prep-btn');
-  btn.innerHTML = '<span class="spinner"></span> Planning...';
-  btn.disabled = true;
-  const meals = [];
-  Object.entries(mealPlan).forEach(([dayIdx, day]) => {
-    if (day.breakfast && day.breakfast.source !== 'outside') meals.push({ day: DAYS[dayIdx], meal: 'breakfast', name: day.breakfast.name, time: day.breakfast.time });
-    if (day.dinner   && day.dinner.source   !== 'outside') meals.push({ day: DAYS[dayIdx], meal: 'dinner',    name: day.dinner.name,    time: day.dinner.time });
-  });
-  if (!meals.length) {
-    document.getElementById('prep-timeline-content').innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No meals planned yet.</div>';
-    btn.textContent = '⏱ Generate prep timeline';
-    btn.disabled = false;
-    return;
-  }
-  let parsed;
-  try {
-    const prepPrompt = 'Smart meal prep coach for Drashti: vegetarian home cook (fresh daily, under 30 mins avg). Week meals: ' + meals.map(m => m.day + ' ' + m.meal + ': ' + m.name + ' (' + m.time + 'min)').join(', ') + '. Identify batch-cook opportunities and a day-by-day schedule. JSON only: {"tips":[{"type":"batch","title":"","detail":"","saves":""}],"schedule":[{"day":"Sunday","tasks":[{"name":"","detail":"","time_mins":15}]}]}';
-    parsed = parseAIJson(await callAI(prepPrompt, 1200));
-  } catch(e) {
-    parsed = buildPrepTimelineLocally(meals);
-  }
-  document.getElementById('prep-timeline-content').innerHTML = renderPrepHtml(parsed);
-  localStorage.setItem('rv_prep_' + getWeekStart(), JSON.stringify(parsed));
-  if (parsed.tips && parsed.tips[0]) {
-    document.getElementById('prep-tip-banner').querySelector('.prep-banner-text').innerHTML = '<strong>Tip:</strong> ' + parsed.tips[0].title + ' — ' + parsed.tips[0].detail;
-  }
-  btn.textContent = '🔄 Regenerate';
-  btn.disabled = false;
-}
-
-function showRecipeDetail(id) {
-  const r = recipes.find(x => x.id === id);
-  if (!r) return;
-  const ings = (r.ingredients && r.ingredients.length)
-    ? '<div class="section-label">Ingredients</div><div style="font-size:13px;line-height:1.9">' + r.ingredients.map(i => '• ' + i).join('<br/>') + '</div>'
-    : '';
-  const steps = (r.steps && r.steps.length)
-    ? '<div class="section-label">Steps</div>' + r.steps.map((s, i) => '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div class="step-text">' + s + '</div></div>').join('')
-    : '';
-  const srcLabel = { pinterest: r.board || '', instagram: r.board || '', ai: '✨ AI suggested', default: '📖 Starter recipe', manual: '✏️ Added manually', url: '🔗 Imported from URL' };
-  document.getElementById('recipe-detail-content').innerHTML =
-    '<div style="display:flex;align-items:center;gap:11px;margin-bottom:14px">' +
-      '<span style="font-size:40px">' + (r.emoji || '🍽') + '</span>' +
-      '<div><div style="font-family:Playfair Display,serif;font-size:18px;font-weight:600">' + r.name + '</div>' +
-      '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">⏱ ' + r.time + ' mins · ' + r.type + '</div>' +
-      '<div style="font-size:10px;color:var(--text-muted);margin-top:2px">' + (srcLabel[r.source] || '') + '</div></div></div>' +
-    '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px">' + (r.tags || []).map(t => '<span class="recipe-tag">' + t + '</span>').join('') + '</div>' +
-    ings + steps + '<div style="margin-top:14px"></div>';
-  document.getElementById('recipe-detail-modal').classList.add('open');
-}
-
-function setFilter(f, el) {
-  activeFilter = f;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  renderRecipes(searchQuery);
-}
-
-function filterRecipes(q) { searchQuery = q; renderRecipes(q); }
-
-function renderRecipes(q) {
-  q = q || '';
-  const list = document.getElementById('recipes-list');
-  let filtered = recipes;
-  if (q) filtered = filtered.filter(r => r.name.toLowerCase().includes(q.toLowerCase()) || (r.tags || []).some(t => t.toLowerCase().includes(q.toLowerCase())));
-  if (activeFilter === 'Dinner') filtered = filtered.filter(r => r.type === 'Dinner' || r.type === 'Both');
-  else if (activeFilter === 'Breakfast') filtered = filtered.filter(r => r.type === 'Breakfast' || r.type === 'Both');
-  else if (activeFilter === 'Snack') filtered = filtered.filter(r => r.type === 'Snack');
-  else if (activeFilter === 'Dessert') filtered = filtered.filter(r => r.type === 'Dessert');
-  else if (activeFilter === 'Salad') filtered = filtered.filter(r => r.type === 'Salad');
-  else if (activeFilter === 'Soup') filtered = filtered.filter(r => r.board === 'Soups');
-  else if (activeFilter === 'Sauce') filtered = filtered.filter(r => r.board === 'Sauce & Chutneys');
-  else if (activeFilter === 'Dip') filtered = filtered.filter(r => r.board === 'Dips & Dressings');
-  document.getElementById('recipe-count').textContent = recipes.length;
-  const times = recipes.map(r => r.time).filter(Boolean);
-  document.getElementById('avg-time').textContent = times.length ? Math.round(times.reduce((a,b) => a+b, 0) / times.length) + 'm' : '—';
-  const _igSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>';
-  const _ptSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>';
-  const srcBadge = { pinterest: '<span class="source-badge src-pinterest">' + _ptSvg + '</span>', instagram: '<span class="source-badge src-instagram">' + _igSvg + '</span>', ai: '<span class="source-badge src-ai">✨</span>', manual: '<span class="source-badge src-manual">✏️</span>' };
-  list.innerHTML = filtered.map(r =>
-    '<div class="recipe-card fade-in" onclick="showRecipeDetail(' + r.id + ')">' +
-      '<div class="recipe-emoji">' + (r.emoji || '🍽') + '</div>' +
-      '<div class="recipe-info">' +
-        '<div class="recipe-name">' + r.name + '</div>' +
-        '<div class="recipe-meta-row"><span>⏱ ' + r.time + 'm</span><span>·</span><span>' + r.type + '</span>' + (srcBadge[r.source] || '') + '</div>' +
-        '<div class="recipe-tags">' + (r.tags || []).slice(0,3).map(t => '<span class="recipe-tag">' + t + '</span>').join('') + (r.board ? '<span class="recipe-tag pink">' + r.board + '</span>' : '') + '</div>' +
-      '</div></div>'
-  ).join('');
-}
-
-function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
-
-async function saveNewRecipe() {
-  const name = document.getElementById('new-name').value.trim();
-  if (!name) return;
-  const steps = document.getElementById('new-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
-  const recipe = {
-    id: Date.now(), name: name,
-    time: parseInt(document.getElementById('new-time').value) || 30,
-    type: document.getElementById('new-type').value,
-    emoji: '🍽',
-    ingredients: document.getElementById('new-ingredients').value.split(',').map(s => s.trim()).filter(Boolean),
-    steps: steps, tags: [], source: 'manual', board: null
-  };
-  const ok = await upsertRecipe(recipe);
-  if (ok) {
-    recipes.push(recipe);
-    closeModal('add-modal');
-    renderRecipes();
-    document.getElementById('new-name').value = '';
-    document.getElementById('new-time').value = '';
-    document.getElementById('new-ingredients').value = '';
-    document.getElementById('new-steps').value = '';
-  }
-}
-
-async function importFromUrl() {
-  const url = document.getElementById('url-import-input').value.trim();
-  if (!url || !url.startsWith('http')) { alert('Please enter a valid URL.'); return; }
-  const btn = document.getElementById('url-import-btn');
-  btn.innerHTML = '<span class="spinner"></span> Reading...';
-  btn.disabled = true;
-  try {
-        const fetchRes = await fetch('/api/fetch-url', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({url}) });
-    if (!fetchRes.ok) throw new Error('Could not fetch URL');
-    const fetchData = await fetchRes.json();
-    if (fetchData.error) throw new Error(fetchData.error);
-    const importPrompt = 'Extract the recipe from this web page content. Respond ONLY in JSON (no markdown): {"name":"","time":25,"type":"Dinner","emoji":"\uD83C\uDF7D","ingredients":["qty ingredient"],"steps":["step"],"tags":[],"sourceUrl":"' + url + '"}. type must be one of: Dinner, Breakfast, Snack, Dessert, Salad. If no recipe found: {"error":"No recipe found"}.\n\nPage content:\n' + fetchData.text;
-    const text = await callAI(importPrompt, 1500);
-    const parsed = parseAIJson(text);
-    if (parsed.error) { btn.textContent = '🔗 Import from URL'; btn.disabled = false; alert('No recipe found on that page.'); return; }
-    pendingImport = parsed;
-    const stepsHtml = (parsed.steps && parsed.steps.length)
-      ? '<div class="section-label" style="margin-top:10px">Steps</div>' + parsed.steps.map((s,i) => '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div class="step-text">' + s + '</div></div>').join('')
-      : '';
-    document.getElementById('url-preview-content').innerHTML =
-      '<div style="background:var(--leaf-light);border:1px solid #A8D5BE;border-radius:var(--radius);padding:14px;margin-bottom:10px">' +
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
-          '<span style="font-size:30px">' + (parsed.emoji || '🍽') + '</span>' +
-          '<div><div style="font-family:Playfair Display,serif;font-size:16px;font-weight:600">' + parsed.name + '</div>' +
-          '<div style="font-size:11px;color:var(--text-muted)">⏱ ' + parsed.time + ' mins · ' + parsed.type + '</div></div></div>' +
-        '<div style="font-size:11px;margin-bottom:5px;font-weight:500;color:var(--text-muted)">Ingredients</div>' +
-        '<div style="font-size:12px;line-height:1.9">' + parsed.ingredients.map(i => '• ' + i).join('<br/>') + '</div>' +
-        stepsHtml + '</div>';
-    document.getElementById('url-preview-modal').classList.add('open');
-    btn.textContent = '🔗 Import from URL';
-    btn.disabled = false;
-  } catch(e) {
-    btn.textContent = '🔗 Import from URL';
-    btn.disabled = false;
-    showError('Something went wrong importing the recipe.');
-  }
-}
-
-function parseRecipeText(text) {
-  // Remove emojis and control chars, keep Latin/punctuation
-  const clean  = s => s.replace(/[^\x00-\x7FÀ-ɏ]/g, '').replace(/\s+/g, ' ').trim();
-  // Title-case a string (handles ALL CAPS)
-  const toTitle = s => s === s.toUpperCase()
-    ? s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
-    : s;
-  // Strip bullet / number prefixes
-  const stripBullet = s => s.replace(/^[-•*✅▢☐✓]\s*/, '').replace(/^\d+[.)]\s*/, '').trim();
-  // Skip noise lines: hashtags, handles, URLs, empty
-  const isNoise = s => !s || /^#\S|^@\S|^https?:\/\/|^www\./i.test(s.trim());
-  // Remove "for serving", "to serve", "for garnish" suffix noise
-  const cleanIng = s => clean(s).replace(/\s*(for serving|to serve|for garnish|as needed)\s*$/i, '').trim();
-
-  // Find section keywords anywhere (works even if preceded by emoji)
-  const ingM  = text.match(/ingredients?\s*:?/i);
-  const stepM = text.match(/steps?\s*:|instructions?\s*:|method\s*:|directions?\s*:/i);
-
-  let title = '', ingredients = [], steps = [];
-
-  if (ingM) {
-    // Title = first meaningful line before INGREDIENTS keyword
-    const beforeIng = text.slice(0, ingM.index).split('\n').map(l => clean(l)).filter(l => l && !isNoise(l));
-    title = toTitle(beforeIng[0] || '').replace(/!+$/, '').trim();
-
-    // Ingredients block
-    const ingStart = ingM.index + ingM[0].length;
-    const ingEnd   = stepM ? stepM.index : text.length;
-    const ingRaw   = text.slice(ingStart, ingEnd).replace(/^[\s:]+/, '').trim();
-
-    // Try newline-split first, then comma-split
-    const byLine = ingRaw.split('\n').map(l => cleanIng(stripBullet(l))).filter(l => l.length > 1 && !isNoise(l));
-    ingredients = byLine.length > 1
-      ? byLine
-      : ingRaw.split(',').map(l => cleanIng(stripBullet(l))).filter(l => l.length > 1);
-
-    // Steps block
-    if (stepM) {
-      const stepStart = stepM.index + stepM[0].length;
-      const stepRaw   = text.slice(stepStart).replace(/^[\s:]+/, '').trim();
-
-      // Try newline-split first, then bullet-split
-      const byStepLine = stepRaw.split('\n')
-        .map(l => clean(stripBullet(l)).replace(/^tip\s*[:\-–]?\s*/i, ''))
-        .filter(l => l.length > 5 && !isNoise(l));
-
-      steps = byStepLine.length > 1
-        ? byStepLine
-        : stepRaw.split('•')
-            .map(l => clean(stripBullet(l)).replace(/^tip\s*[:\-–]?\s*/i, ''))
-            .filter(l => l.length > 5);
-    }
-  } else {
-    // No section headers — line-by-line fallback
-    const lines = text.split('\n').map(l => clean(l)).filter(l => l && !isNoise(l));
-    title = toTitle(lines[0] || '').replace(/!+$/, '').trim();
-    const firstStep = lines.findIndex((l, i) => i > 0 && /^1[.)]\s/.test(l));
-    if (firstStep > 0) {
-      ingredients = lines.slice(1, firstStep).map(stripBullet);
-      steps       = lines.slice(firstStep).map(l => stripBullet(l).replace(/^tip\s*[:\-–]?\s*/i, ''));
-    } else {
-      ingredients = lines.slice(1).map(stripBullet);
-    }
-  }
-
-  return {
-    title,
-    ingredients: ingredients.filter(Boolean),
-    steps: steps.filter(Boolean)
-  };
-}
-
-function parseAndShowForm() {
-  const text = document.getElementById('paste-import-input').value.trim();
-  if (text.length < 10) { showError('Paste some recipe text first.'); return; }
-  const p = parseRecipeText(text);
-  document.getElementById('paste-name').value = p.title;
-  document.getElementById('paste-ingredients').value = p.ingredients.join('\n');
-  document.getElementById('paste-steps').value = p.steps.join('\n');
-  document.getElementById('paste-time').value = '';
-  document.getElementById('paste-step-1').style.display = 'none';
-  document.getElementById('paste-step-2').style.display = 'block';
-}
-
-function resetPasteForm() {
-  document.getElementById('paste-step-1').style.display = 'block';
-  document.getElementById('paste-step-2').style.display = 'none';
-}
-
-async function savePastedRecipe() {
-  const name = document.getElementById('paste-name').value.trim();
-  const ingredients = document.getElementById('paste-ingredients').value.trim().split('\n').map(l => l.trim()).filter(Boolean);
-  const steps = document.getElementById('paste-steps').value.trim().split('\n').map(l => l.trim()).filter(Boolean);
-  if (!name) { showError('Recipe name is required.'); return; }
-  if (!ingredients.length) { showError('Add at least one ingredient.'); return; }
-  if (!steps.length) { showError('Add at least one step.'); return; }
-  const catVal = document.getElementById('paste-type').value;
-  const boardMap = { Soup: { type: 'Snack', board: 'Soups' }, Sauce: { type: 'Snack', board: 'Sauce & Chutneys' }, Dip: { type: 'Snack', board: 'Dips & Dressings' } };
-  const { type, board } = boardMap[catVal] || { type: catVal, board: null };
-  const emojiMap = { Dinner: '🌙', Breakfast: '🌅', Snack: '🍿', Dessert: '🍮', Salad: '🥗', Soup: '🍲', Sauce: '🌿', Dip: '🫙' };
-  const recipe = {
-    id: Date.now(),
-    name,
-    type,
-    board,
-    time: parseInt(document.getElementById('paste-time').value) || 30,
-    emoji: emojiMap[catVal] || '🍽',
-    ingredients,
-    steps,
-    tags: [],
-    source: 'manual'
-  };
-  const ok = await upsertRecipe(recipe);
-  if (ok) {
-    recipes.push(recipe);
-    renderRecipes();
-    showStatus('Recipe saved!');
-    setTimeout(hideStatus, 2000);
-    document.getElementById('paste-import-input').value = '';
-    resetPasteForm();
-  } else {
-    showError('Could not save recipe. Try again.');
-  }
-}
-
-async function saveImportedRecipe() {
-  if (!pendingImport) return;
-  const source = pendingImport._fromPaste ? 'instagram' : 'url';
-  const recipe = Object.assign({ id: Date.now(), source, board: null }, pendingImport);
-  delete recipe._fromPaste;
-  const ok = await upsertRecipe(recipe);
-  if (ok) {
-    recipes.push(recipe);
-    closeModal('url-preview-modal');
-    document.getElementById('url-import-input').value = '';
-    const pasteEl = document.getElementById('paste-import-input');
-    if (pasteEl) pasteEl.value = '';
-    pendingImport = null;
-    renderRecipes();
-    showStatus('Recipe saved! ✓', 'var(--leaf)');
-    setTimeout(hideStatus, 2000);
-  }
-}
-
-// ── GROCERY HELPERS ──────────────────────────────────────────────────────────
-const PLURAL_FIX = {
-  tomatoes:'tomato', potatoes:'potato', onions:'onion', shallots:'shallot',
-  eggs:'egg', cloves:'clove', leaves:'leaf', seeds:'seed', mushrooms:'mushroom',
-  beans:'bean', peas:'pea', nuts:'nut', avocados:'avocado', mangoes:'mango',
-  berries:'berry', chickpeas:'chickpea', lentils:'lentil', carrots:'carrot',
-  noodles:'noodle', olives:'olive', peppers:'pepper', almonds:'almond',
-  pistachios:'pistachio', cashews:'cashew', raisins:'raisin', sprouts:'sprout',
-  'curry leaves':'curry leaf'
-};
-
-const SYNONYM_MAP = {
-  jeera:'cumin', haldi:'turmeric', dhaniya:'coriander', aloo:'potato',
-  palak:'spinach', tamatar:'tomato', pyaaz:'onion', lehsun:'garlic',
-  adrak:'ginger', besan:'gram flour', atta:'whole wheat flour',
-  hing:'asafoetida', methi:'fenugreek leaf', 'kali mirch':'black pepper',
-  'lal mirch':'red chili', 'shimla mirch':'bell pepper', bhindi:'okra',
-  lauki:'bottle gourd', rajma:'kidney bean', chana:'chickpea',
-  moong:'mung bean', masoor:'red lentil', urad:'black lentil',
-  poha:'flattened rice', suji:'semolina', rava:'semolina',
-  imli:'tamarind', kaju:'cashew', badam:'almond', pista:'pistachio',
-  capsicum:'bell pepper', cilantro:'coriander', 'spring onion':'green onion',
-  scallion:'green onion', aubergine:'eggplant', courgette:'zucchini',
-  'chick pea':'chickpea', ladyfinger:'okra', curd:'yogurt',
-  chilli:'chili', chillies:'chili', chilies:'chili',
-  'green chilli':'green chili', 'red chilli':'red chili'
-};
-
-const PRODUCE_KEYS = new Set([
-  'tomato','onion','garlic','ginger','spinach','bell pepper','carrot','potato',
-  'cucumber','eggplant','zucchini','mushroom','lettuce','broccoli','cauliflower',
-  'pea','bean','green bean','lemon','lime','orange','apple','banana','mango',
-  'papaya','avocado','corn','celery','radish','beetroot','kale','cabbage','okra',
-  'bottle gourd','coriander','mint','basil','parsley','green onion','cherry tomato',
-  'chili','green chili','red chili','curry leaf','shallot','capsicum',
-  'aubergine','courgette','sweet potato','yam','pumpkin','brussels sprout',
-  'asparagus','leek','fennel','artichoke','bok choy','pak choi','chive',
-  'dill','tarragon','sage','thyme leaf','rosemary sprig'
-]);
-
-const DAIRY_KEYS = new Set([
-  'milk','cream','cheese','yogurt','butter','ghee','paneer','egg','curd',
-  'sour cream','cream cheese','mozzarella','parmesan','ricotta','cheddar',
-  'condensed milk','evaporated milk','buttermilk','whipped cream','feta',
-  'cottage cheese','mascarpone','halloumi','brie','gouda'
-]);
-
-const GRAINS_KEYS = new Set([
-  'rice','wheat','flour','bread','pasta','noodle','oat','quinoa','lentil',
-  'chickpea','kidney bean','black bean','mung bean','red lentil','black lentil',
-  'semolina','cornmeal','gram flour','whole wheat flour','flattened rice','couscous',
-  'barley','millet','buckwheat','bread crumb','pita','tortilla','poha',
-  'vermicelli','spaghetti','penne','rice noodle','dal','toor dal','chana dal',
-  'moong dal','urad dal','masoor dal','rava','oatmeal','polenta'
-]);
-
-const SPICES_KEYS = new Set([
-  'cumin','turmeric','chili powder','cardamom','cinnamon','clove','bay leaf',
-  'mustard seed','fennel seed','fenugreek','asafoetida','star anise','garam masala',
-  'curry powder','paprika','oregano','nutmeg','saffron','black pepper',
-  'red chili powder','coriander powder','cumin powder','amchur','kasuri methi',
-  'black salt','rock salt','chaat masala','pav bhaji masala','sambar powder',
-  'biryani masala','chili flake','allspice','ajwain','carom seed','fenugreek seed',
-  'fenugreek leaf','dried chili','mixed spice','coriander seed'
-]);
-
-const PANTRY_KEYS = new Set([
-  'oil','olive oil','coconut oil','sesame oil','vegetable oil','sunflower oil',
-  'mustard oil','salt','sugar','jaggery','honey','maple syrup','agave',
-  'vinegar','soy sauce','coconut milk','tomato paste','tamarind','water',
-  'baking soda','baking powder','vanilla','cocoa','stock','broth','cornstarch',
-  'arrowroot','yeast','coconut cream','hot sauce','ketchup','mayonnaise',
-  'mustard','tahini','miso','nutritional yeast','rose water','cooking spray',
-  'food colour','liquid smoke','worcestershire','fish sauce'
-]);
-
-const ML_UNITS = {
-  tsp:5, teaspoon:5, tbsp:15, tablespoon:15, cup:240,
-  ml:1, l:1000, litre:1000, liter:1000, pint:473, quart:946
-};
-const G_UNITS = { g:1, gram:1, kg:1000, oz:28, lb:453, pound:453 };
-
-function splitCompound(raw) {
-  return raw.split(/\s+and\s+|\s*[&+]\s*/i).map(s => s.trim()).filter(Boolean);
-}
-
-function ingQty(raw) {
-  const m = raw.trim().match(/^\(?([\d\s¼½¾⅓⅔⅛.\/\xd7x]+(?:cups?|tbsp?|tsp?|tablespoons?|teaspoons?|g|grams?|kg|oz|ounces?|lbs?|ml|l|litres?|bunch(?:es)?|cans?|cloves?|medium|large|small|inch(?:es)?|handful|pinch(?:es)?|drizzle|sprigs?|pieces?|slices?)?)\)?\s+/i);
-  return m ? m[1].trim() : '';
-}
-
-function ingKey(raw) {
-  let s = raw.trim();
-  s = s.replace(/^\([\d\s¼½¾⅓⅔⅛.\/\xd7x\w]+\)\s*/i, '');
-  s = s.replace(/^[\d\s¼½¾⅓⅔⅛.\/\xd7x-]+(?:cups?|tbsp?|tsp?|tablespoons?|teaspoons?|g|grams?|kg|oz|ounces?|lbs?|ml|l|litres?|bunch(?:es)?|cans?|cloves?|medium|large|small|inch(?:es)?|handful|pinch(?:es)?|drizzle|sprigs?|pieces?|slices?)?\s*/gi, '');
-  s = s.replace(/,.*$/, '');
-  s = s.replace(/^(?:fresh|dried|frozen|canned|ripe|raw|cooked|boiled|roasted|chopped|diced|grated|sliced|minced|baby|whole|ground|organic|plain|uncooked|full.fat|low.fat|rinsed|drained)\s+/gi, '');
-  s = s.replace(/\s+(?:chopped|diced|sliced|grated|minced|crushed|halved|peeled|seeded|boiled|mashed|roasted|rinsed|drained|washed|shredded|roughly|finely|thinly|softened|soaked|to\s+taste|as\s+needed|optional|for\s+\w+)\b.*/gi, '');
-  s = s.trim().toLowerCase().replace(/\s+/g, ' ');
-  if (!s) return '';
-  if (SYNONYM_MAP[s]) return SYNONYM_MAP[s];
-  if (PLURAL_FIX[s]) return PLURAL_FIX[s];
-  const parts = s.split(' ');
-  const last = parts[parts.length - 1];
-  if (PLURAL_FIX[last]) { parts[parts.length - 1] = PLURAL_FIX[last]; return parts.join(' '); }
-  if (s.length > 4 && s.endsWith('s') && !/(?:ss|us|is|as|os|ous)$/.test(s)) s = s.slice(0, -1);
-  return s;
-}
-
-function parseQtyNum(s) {
-  const FRAC = {'½':0.5,'¼':0.25,'¾':0.75,'⅓':1/3,'⅔':2/3,'⅛':0.125};
-  s = s.trim();
-  for (const [k,v] of Object.entries(FRAC)) s = s.replace(k, ' '+v);
-  let n = 0;
-  for (const p of s.trim().split(/\s+/)) {
-    if (p.includes('/')) { const [a,b] = p.split('/'); n += parseFloat(a)/parseFloat(b)||0; }
-    else n += parseFloat(p)||0;
-  }
-  return n;
-}
-
-function parseQtyStr(qtyStr) {
-  if (!qtyStr) return null;
-  const m = qtyStr.trim().match(/^([\d\s½¼¾⅓⅔⅛.\/]+)\s*([a-z]+)?$/i);
-  if (!m) return null;
-  const amount = parseQtyNum(m[1]);
-  if (!amount) return null;
-  const unitRaw = (m[2]||'').toLowerCase().replace(/s$/, '');
-  if (ML_UNITS[unitRaw]) return {amount, unit:unitRaw, family:'volume', base:amount*ML_UNITS[unitRaw]};
-  if (G_UNITS[unitRaw])  return {amount, unit:unitRaw, family:'weight',  base:amount*G_UNITS[unitRaw]};
-  return {amount, unit:m[2]||'', family:'count', base:amount};
-}
-
-function sumQtys(qtyArr) {
-  if (!qtyArr || !qtyArr.length) return '';
-  const parsed = qtyArr.map(parseQtyStr).filter(Boolean);
-  if (!parsed.length) return qtyArr.join(' · ');
-  const byFamily = {};
-  parsed.forEach(p => {
-    if (!byFamily[p.family]) byFamily[p.family] = {total:0, unit:p.unit, items:[]};
-    byFamily[p.family].total += p.base;
-    byFamily[p.family].items.push(p);
-  });
-  const parts = [];
-  for (const [fam, {total, items}] of Object.entries(byFamily)) {
-    if (fam === 'volume') {
-      if (total >= 240) parts.push(+(total/240).toFixed(2).replace(/\.?0+$/,'') + (total/240===1?' cup':' cups'));
-      else if (total >= 15) parts.push(+(total/15).toFixed(1).replace(/\.?0+$/,'') + ' tbsp');
-      else parts.push(+(total/5).toFixed(1).replace(/\.?0+$/,'') + ' tsp');
-    } else if (fam === 'weight') {
-      if (total >= 1000) parts.push(+(total/1000).toFixed(2).replace(/\.?0+$/,'') + ' kg');
-      else parts.push(Math.round(total) + ' g');
-    } else {
-      const u = items[0].unit;
-      parts.push(Math.round(total) + (u ? ' '+u : ''));
-    }
-  }
-  return parts.filter(Boolean).join(' · ');
-}
-
-function getCategory(key) {
-  if (!key) return 'other';
-  const tokens = key.split(' ');
-  const check = set => set.has(key) || tokens.some(t => set.has(t));
-  if (check(PANTRY_KEYS))  return 'pantry';
-  if (check(PRODUCE_KEYS)) return 'produce';
-  if (check(DAIRY_KEYS))   return 'dairy';
-  if (check(GRAINS_KEYS))  return 'grains';
-  if (check(SPICES_KEYS))  return 'spices';
-  return 'other';
-}
-
-function jaro(s1, s2) {
-  if (s1 === s2) return 1;
-  const l1 = s1.length, l2 = s2.length;
-  const md = Math.max(Math.floor(Math.max(l1,l2)/2)-1, 0);
-  let matches = 0, t = 0;
-  const m1 = new Array(l1).fill(false), m2 = new Array(l2).fill(false);
-  for (let i=0;i<l1;i++) {
-    for (let j=Math.max(0,i-md);j<Math.min(i+md+1,l2);j++) {
-      if (m2[j]||s1[i]!==s2[j]) continue;
-      m1[i]=m2[j]=true; matches++; break;
-    }
-  }
-  if (!matches) return 0;
-  let k=0;
-  for (let i=0;i<l1;i++) {
-    if (!m1[i]) continue;
-    while (!m2[k]) k++;
-    if (s1[i]!==s2[k]) t++;
-    k++;
-  }
-  return (matches/l1+matches/l2+(matches-t/2)/matches)/3;
-}
-
-function tokenSetRatio(a, b) {
-  const ta = new Set(a.split(' ')), tb = new Set(b.split(' '));
-  const inter = [...ta].filter(t=>tb.has(t)).sort().join(' ');
-  const ra = [...ta].filter(t=>!tb.has(t)).sort().join(' ');
-  const rb = [...tb].filter(t=>!ta.has(t)).sort().join(' ');
-  const s1 = (inter+' '+ra).trim(), s2 = (inter+' '+rb).trim();
-  return Math.max(jaro(s1,s2), inter ? Math.max(jaro(inter,s1),jaro(inter,s2)) : 0);
-}
-
-function fuzzyDedup(all) {
-  const keys = Object.keys(all);
-  const dropped = new Set();
-  for (let i=0;i<keys.length;i++) {
-    if (dropped.has(keys[i])) continue;
-    for (let j=i+1;j<keys.length;j++) {
-      if (dropped.has(keys[j])) continue;
-      if (tokenSetRatio(keys[i],keys[j]) >= 0.88) {
-        const keep = all[keys[i]].count >= all[keys[j]].count ? keys[i] : keys[j];
-        const drop = keep===keys[i] ? keys[j] : keys[i];
-        all[keep].count += all[drop].count;
-        all[keep].qtys.push(...all[drop].qtys);
-        dropped.add(drop);
-        delete all[drop];
-      }
-    }
-  }
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
-async function generateGrocery() {
-  const all = {};
-  Object.values(mealPlan).forEach(day => {
-    ['breakfast', 'dinner'].forEach(m => {
-      const meal = day && day[m];
-      if (!meal || !meal.ingredients || meal.source === 'outside') return;
-      meal.ingredients.forEach(raw => {
-        splitCompound(raw).forEach(part => {
-          const key = ingKey(part);
-          const qty = ingQty(part);
-          if (key.length < 2) return;
-          if (all[key]) {
-            all[key].count++;
-            if (qty) all[key].qtys.push(qty);
-          } else {
-            const display = key.replace(/\b\w/g, c => c.toUpperCase());
-            all[key] = { name: display, checked: false, count: 1, qtys: qty ? [qty] : [] };
-          }
-        });
-      });
-    });
-  });
-  fuzzyDedup(all);
-  Object.values(all).forEach(item => {
-    item.category = getCategory(item.name.toLowerCase());
-    item.qtyDisplay = sumQtys(item.qtys);
-  });
-  groceries = Object.values(all);
-  await persistGroceries();
-}
-
-function renderGrocery() {
-  const list = document.getElementById('grocery-list');
-  const checked = groceries.filter(g => g.checked).length;
-  document.getElementById('grocery-summary').textContent = checked + ' of ' + groceries.length + ' items checked';
-  const titleEl = document.getElementById('grocery-title');
-  if (titleEl) titleEl.textContent = weekOffset === 0 ? "This week's list" : weekOffset === 1 ? "Next week's list" : "Week " + weekOffset + " list";
-  if (!groceries.length) {
-    list.innerHTML = '<div style="text-align:center;padding:18px;font-size:12px;color:var(--text-muted)">No items yet. Plan meals first then tap regenerate.</div>';
-    return;
-  }
-
-  const CAT_ORDER  = ['produce','dairy','grains','spices','pantry','other'];
-  const CAT_LABELS = {
-    produce:'🥦 Produce', dairy:'🥛 Dairy & Eggs', grains:'🌾 Grains & Pulses',
-    spices:'🧂 Spices & Herbs', pantry:'🫙 Pantry Staples', other:'📦 Other'
-  };
-
-  const byCategory = {};
-  groceries.forEach((g, i) => {
-    const cat = g.category || getCategory(g.name.toLowerCase());
-    const qtyDisplay = g.qtyDisplay || sumQtys(g.qtys || []);
-    (byCategory[cat] = byCategory[cat] || []).push({...g, i, qtyDisplay});
-  });
-
-  let html = '';
-  for (const cat of CAT_ORDER) {
-    const items = byCategory[cat];
-    if (!items || !items.length) continue;
-    const isPantry = cat === 'pantry';
-    html += '<div style="font-size:11px;font-weight:600;color:var(--text-muted);padding:10px 0 4px;' + (isPantry ? 'opacity:.65' : '') + '">' +
-      CAT_LABELS[cat] + (isPantry ? '<span style="font-weight:400"> — check if you have these</span>' : '') +
-    '</div>';
-    html += items.map(({name, checked, qtyDisplay, i}) =>
-      '<div class="grocery-item" style="align-items:center">' +
-        '<div class="grocery-check ' + (checked ? 'checked' : '') + '" onclick="toggleGrocery(' + i + ')" style="flex-shrink:0;margin-top:1px">' +
-          (checked ? '<span style="color:#fff;font-size:12px">✓</span>' : '') +
-        '</div>' +
-        '<div style="flex:1;min-width:0">' +
-          '<div class="grocery-item-name ' + (checked ? 'checked' : '') + '">' + name + '</div>' +
-          (qtyDisplay ? '<div style="font-size:10px;color:var(--text-muted);margin-top:1px">' + qtyDisplay + '</div>' : '') +
-        '</div>' +
-      '</div>'
-    ).join('');
-  }
-  list.innerHTML = html;
-}
-
-async function toggleGrocery(i) {
-  groceries[i].checked = !groceries[i].checked;
-  const id = groceries[i].id;
-  if (id) {
-    const { error } = await db.from('groceries').update({ checked: groceries[i].checked }).eq('id', id);
-    if (error) showError('Could not update item: ' + error.message);
-  }
-
-  const allDone = groceries.length > 0 && groceries.every(g => g.checked);
-  if (allDone) {
-    const ids = groceries.filter(g => g.id).map(g => g.id);
-    if (ids.length) await db.from('groceries').delete().in('id', ids);
-    groceries = [];
-    document.getElementById('grocery-list').innerHTML =
-      '<div style="text-align:center;padding:28px 16px">' +
-        '<div style="font-size:40px;margin-bottom:10px">🛍️✨</div>' +
-        '<div style="font-size:15px;font-weight:600;margin-bottom:5px">Yay, all done!</div>' +
-        '<div style="font-size:12px;color:var(--text-muted)">You got everything — happy cooking! 🎉</div>' +
-      '</div>';
-    document.getElementById('grocery-summary').textContent = 'All picked up!';
-    return;
-  }
-
-  renderGrocery();
-}
-
-async function clearChecked() {
-  const ids = groceries.filter(g => g.checked && g.id).map(g => g.id);
-  if (ids.length) {
-    const { error } = await db.from('groceries').delete().in('id', ids);
-    if (error) { showError('Could not clear items: ' + error.message); return; }
-  }
-  groceries = groceries.filter(g => !g.checked);
-  renderGrocery();
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-  const sb = document.getElementById('suggest-btn');
-  if (sb) sb.style.display = '';
-}
-
-
-// ── SMART MEAL PLANNER ───────────────────────────────────────────────────────
-let smartPlanResult = null;
-let _smartPlanModified = false;
-
-function openSmartPlanModal() {
-  smartPlanResult = null;
-  _smartPlanModified = false;
-  document.getElementById('smart-plan-content').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px"><span class="spinner"></span></div>';
-  const saveBtn = document.getElementById('smart-plan-save-btn');
-  saveBtn.style.display = 'none';
-  saveBtn.disabled = true;
-  document.getElementById('smart-plan-modal').classList.add('open');
-  generateSmartPlan();
-}
-
-function generateSmartPlan() {
-  const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-  const dinners  = shuffle(recipes.filter(r => r.type === 'Dinner'    || r.type === 'Both'));
-  const bfasts   = shuffle(recipes.filter(r => r.type === 'Breakfast' || r.type === 'Both'));
-  const FULL_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  const OUTSIDE_CUISINES = ['Indian', 'Thai', 'Mexican', 'Italian', 'Japanese', 'Mediterranean'];
-
-  const plan = [];
-  let dIdx = 0, bIdx = 0;
-
-  for (let i = 0; i < 5; i++) {
-    const dayIdx = (todayIdx + i) % 7;
-    const dayName = FULL_DAYS[dayIdx];
-    const isWeekend = dayIdx === 5 || dayIdx === 6;
-
-    if (isWeekend) {
-      const cuisine = OUTSIDE_CUISINES[Math.floor(Math.random() * OUTSIDE_CUISINES.length)];
-      plan.push({ dayName, dayIndex: dayIdx, isOutside: true, cuisine, note: 'Eat out — enjoy your cheat day!' });
-    } else {
-      const dinner  = dinners[dIdx++ % dinners.length];
-      const bfast   = bfasts[bIdx++ % bfasts.length];
-      const note    = dayIdx === 2 ? 'Wednesday — lunch at work!' : '';
-      plan.push({ dayName, dayIndex: dayIdx, isOutside: false, breakfast: bfast.name, dinner: dinner.name, note });
-    }
-  }
-
-  smartPlanResult = plan;
-  _smartPlanModified = false;
-  renderSmartPlan(plan);
-  const saveBtn = document.getElementById('smart-plan-save-btn');
-  saveBtn.style.display = '';
-  saveBtn.disabled = true;
-}
-
-function renderSmartPlan(plan) {
-  let html = '';
-  plan.forEach((day, i) => {
-    if (day.isOutside) {
-      html += '<div class="card-sm" style="border-left:3px solid var(--berry);margin-bottom:8px">' +
-        '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">' +
-          '<span style="font-size:18px">🍽</span>' +
-          '<div><div style="font-size:13px;font-weight:500">' + day.dayName + ' <span style="font-size:10px;background:var(--berry-light);color:var(--berry);padding:1px 6px;border-radius:8px;font-weight:600">Outside</span></div>' +
-          '<div style="font-size:11px;color:var(--text-muted);margin-top:1px">🌏 ' + (day.cuisine || 'Any cuisine') + '</div></div>' +
-        '</div>' +
-        '<div style="font-size:11px;color:var(--text-muted)">' + (day.note || '') + '</div>' +
-        '<button class="btn btn-outline btn-sm" style="margin-top:7px;width:100%;font-size:11px" onclick="swapOutsideDay(' + i + ')">🔄 Change to home cooking</button>' +
-      '</div>';
-    } else {
-      const bfast = day.breakfast || '';
-      const dinner = day.dinner || '';
-      html += '<div class="card-sm" style="border-left:3px solid var(--leaf);margin-bottom:8px">' +
-        '<div style="font-size:13px;font-weight:500;margin-bottom:6px">' + day.dayName + ' <span style="font-size:10px;background:var(--leaf-light);color:var(--leaf);padding:1px 6px;border-radius:8px;font-weight:600">Home</span></div>' +
-        '<div style="display:flex;flex-direction:column;gap:4px">' +
-          '<div style="display:flex;align-items:center;gap:6px">' +
-            '<span style="font-size:13px">🌅</span>' +
-            '<span style="font-size:12px;flex:1">' + bfast + '</span>' +
-            '<button class="btn btn-outline" style="padding:2px 7px;font-size:10px;border-radius:6px" onclick="swapMeal(' + i + ',&quot;breakfast&quot;)">swap</button>' +
-          '</div>' +
-          '<div style="display:flex;align-items:center;gap:6px">' +
-            '<span style="font-size:13px">🌙</span>' +
-            '<span style="font-size:12px;flex:1">' + dinner + '</span>' +
-            '<button class="btn btn-outline" style="padding:2px 7px;font-size:10px;border-radius:6px" onclick="swapMeal(' + i + ',&quot;dinner&quot;)">swap</button>' +
-          '</div>' +
-        '</div>' +
-        (day.note ? '<div style="font-size:11px;color:var(--text-muted);margin-top:5px">💡 ' + day.note + '</div>' : '') +
-      '</div>';
-    }
-  });
-  document.getElementById('smart-plan-content').innerHTML = html;
-}
-
-function swapMeal(planIdx, mealType) {
-  if (!smartPlanResult) return;
-  const day = smartPlanResult[planIdx];
-  const suitable = recipes.filter(r => {
-    if (mealType === 'breakfast') return r.type === 'Breakfast' || r.type === 'Both';
-    return r.type === 'Dinner' || r.type === 'Both';
-  });
-  // Simple picker inline
-  let html = '<div style="margin-bottom:8px;font-size:12px;font-weight:500">Pick a ' + mealType + ' for ' + day.dayName + ':</div>';
-  html += '<div style="max-height:260px;overflow-y:auto">';
-  window.__swapOptions = suitable;
-  window.__swapPlanIdx = planIdx;
-  window.__swapMealType = mealType;
-  suitable.forEach((r, ri) => {
-    html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="applySwapByIndex(' + ri + ')">' +
-      '<span style="font-size:18px">' + (r.emoji || '🍽') + '</span>' +
-      '<div><div style="font-size:12px;font-weight:500">' + r.name + '</div><div style="font-size:10px;color:var(--text-muted)">⏱ ' + r.time + 'm</div></div>' +
-    '</div>';
-  });
-  html += '</div><button class="btn btn-outline btn-sm btn-full" style="margin-top:8px" onclick="renderSmartPlan(smartPlanResult)">← Back</button>';
-  document.getElementById('smart-plan-content').innerHTML = html;
-}
-
-function applySwapByIndex(ri) {
-  const r = window.__swapOptions[ri];
-  if (r) applySwap(window.__swapPlanIdx, window.__swapMealType, r.name);
-}
-
-function applySwap(planIdx, mealType, recipeName) {
-  if (!smartPlanResult) return;
-  smartPlanResult[planIdx][mealType] = recipeName;
-  _smartPlanModified = true;
-  const saveBtn = document.getElementById('smart-plan-save-btn');
-  saveBtn.disabled = false;
-  renderSmartPlan(smartPlanResult);
-}
-
-function swapOutsideDay(planIdx) {
-  if (!smartPlanResult) return;
-  const day = smartPlanResult[planIdx];
-  day.isOutside = false;
-  // Pick random breakfast and dinner
-  const dinners = recipes.filter(r => r.type === 'Dinner' || r.type === 'Both');
-  const bfasts = recipes.filter(r => r.type === 'Breakfast' || r.type === 'Both');
-  day.dinner = dinners[Math.floor(Math.random() * dinners.length)].name;
-  day.breakfast = bfasts[Math.floor(Math.random() * bfasts.length)].name;
-  _smartPlanModified = true;
-  document.getElementById('smart-plan-save-btn').disabled = false;
-  renderSmartPlan(smartPlanResult);
-}
-
-async function saveSmartPlan() {
-  if (!smartPlanResult) return;
-  const btn = document.getElementById('smart-plan-save-btn');
-  btn.innerHTML = '<span class="spinner"></span> Saving...';
-  btn.disabled = true;
-
-  for (const day of smartPlanResult) {
-    const dayIdx = day.dayIndex;
-    if (!mealPlan[dayIdx]) mealPlan[dayIdx] = {};
-
-    if (day.isOutside) {
-      const outsideRecipe = { id: 'outside_' + dayIdx, name: '🍽 Outside — ' + (day.cuisine || 'Dining out'), time: 0, type: 'Dinner', emoji: '🍽', source: 'outside', tags: [], ingredients: [], steps: [], board: null };
-      mealPlan[dayIdx].dinner = outsideRecipe;
-      await saveMealSlot(dayIdx, 'dinner', outsideRecipe);
-      mealPlan[dayIdx].breakfast = null;
-      await saveMealSlot(dayIdx, 'breakfast', null);
-    } else {
-      if (day.breakfast) {
-        const bRec = recipes.find(r => r.name === day.breakfast);
-        if (bRec) { mealPlan[dayIdx].breakfast = bRec; await saveMealSlot(dayIdx, 'breakfast', bRec); }
-      }
-      if (day.dinner) {
-        const dRec = recipes.find(r => r.name === day.dinner);
-        if (dRec) { mealPlan[dayIdx].dinner = dRec; await saveMealSlot(dayIdx, 'dinner', dRec); }
-      }
-    }
-  }
-
-  localStorage.removeItem('rv_nut_' + getWeekStart());
-  localStorage.removeItem('rv_prep_' + getWeekStart());
-  closeModal('smart-plan-modal');
-  renderWeekGrid();
-  renderMealSlots();
-  showStatus('Plan saved! ✓', 'var(--leaf)');
-  setTimeout(hideStatus, 2000);
-  btn.textContent = '✓ Save this plan';
-  btn.disabled = false;
-}
-
-// ── AI HELPER ────────────────────────────────────────────────────────────────
-function parseAIJson(text) {
-  try { return JSON.parse(text); } catch(_) {}
-  const s = text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
-  try { return JSON.parse(s); } catch(_) {}
-  const m = s.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
-  if (m) { try { return JSON.parse(m[1]); } catch(_) {} }
-  throw new Error('Could not parse AI response as JSON');
-}
-
-// ── INGREDIENT-BASED RECIPE ──────────────────────────────────────────────────
-function openIngredientsModal() {
-  document.getElementById('ing-input').value = '';
-  document.getElementById('ing-results').innerHTML = '';
-  document.getElementById('gen-recipe-btn').innerHTML = '✨ Generate recipe';
-  document.getElementById('gen-recipe-btn').disabled = false;
-  document.getElementById('ingredients-modal').classList.add('open');
-}
-
-function clearIngResults() {
-  document.getElementById('ing-results').innerHTML = '';
-}
-
-function findByIngredients() {
-  const input = document.getElementById('ing-input').value;
-  if (!input.trim()) { showError('Enter at least one ingredient'); return; }
-  const terms = input.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
-  const scored = recipes.map(r => {
-    const ingText = (r.ingredients || []).join(' ').toLowerCase();
-    const matched = terms.filter(t => ingText.includes(t));
-    return { r, count: matched.length, matched };
-  }).filter(x => x.count > 0).sort((a, b) => b.count - a.count);
-
-  if (!scored.length) {
-    document.getElementById('ing-results').innerHTML =
-      '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:14px">No vault recipes match those ingredients.<br>Try <em>Generate recipe</em> to create a new one!</div>';
-    return;
-  }
-  let html = '<div class="section-label">' + scored.length + ' recipe' + (scored.length > 1 ? 's' : '') + ' in your vault</div>';
-  scored.forEach(({ r, matched }) => {
-    html += '<div class="recipe-card" onclick="showRecipeDetail(' + r.id + ')">' +
-      '<div class="recipe-emoji">' + (r.emoji || '🍽') + '</div>' +
-      '<div class="recipe-info">' +
-        '<div class="recipe-name">' + r.name + '</div>' +
-        '<div class="recipe-meta-row"><span>⏱ ' + r.time + 'm</span></div>' +
-        '<div class="recipe-tags">' + matched.map(t => '<span class="recipe-tag green">✓ ' + t + '</span>').join('') + '</div>' +
-      '</div></div>';
-  });
-  document.getElementById('ing-results').innerHTML = html;
-}
-
-let _generatedRecipe = null;
-
-async function generateRecipeFromIngredients() {
-  const input = document.getElementById('ing-input').value;
-  if (!input.trim()) { showError('Enter at least one ingredient first'); return; }
-  const btn = document.getElementById('gen-recipe-btn');
-  btn.innerHTML = '<span class="spinner"></span> Creating...';
-  btn.disabled = true;
-  const prompt = 'Create a vegetarian recipe (eggs OK, no sugar, no store protein powder) using these ingredients: ' + input + '. Return ONLY a JSON object: {"name":"...","time":25,"type":"Dinner","emoji":"🍛","tags":["tag1"],"ingredients":["qty ingredient"],"steps":["Step 1","Step 2"]}. type must be one of: Dinner, Breakfast, Snack, Dessert, Salad, Both.';
-  try {
-    const text = await callAI(prompt, 900);
-    const data = parseAIJson(text);
-    _generatedRecipe = data;
-    let html = '<div style="background:var(--leaf-light);border:1px solid var(--leaf);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px">' +
-      '<div style="font-size:16px;font-weight:500;margin-bottom:4px">' + (data.emoji || '🍽') + ' ' + data.name + '</div>' +
-      '<div style="font-size:11px;color:var(--text-muted);margin-bottom:7px">⏱ ' + data.time + ' mins · ' + data.type + '</div>' +
-      '<div style="font-size:11px;font-weight:600;margin-bottom:3px">Ingredients</div>' +
-      '<div style="font-size:11px;color:var(--text-muted);margin-bottom:7px">' + (data.ingredients || []).join(', ') + '</div>' +
-      '<div style="font-size:11px;font-weight:600;margin-bottom:3px">Steps</div>' +
-      (data.steps || []).map((s, i) => '<div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">' + (i+1) + '. ' + s + '</div>').join('') +
-    '</div>' +
-    '<button class="btn btn-leaf btn-full" onclick="saveGeneratedRecipe()">💾 Save to my recipes</button>';
-    document.getElementById('ing-results').innerHTML = html;
-  } catch(e) {
-    showError('AI unavailable — showing vault matches instead');
-    findByIngredients();
-  }
-  btn.innerHTML = '✨ Generate recipe';
-  btn.disabled = false;
-}
-
-async function saveGeneratedRecipe() {
-  if (!_generatedRecipe) return;
-  const recipe = {
-    id: Date.now(),
-    name: _generatedRecipe.name,
-    time: parseInt(_generatedRecipe.time) || 30,
-    type: _generatedRecipe.type || 'Dinner',
-    emoji: _generatedRecipe.emoji || '🍽',
-    tags: _generatedRecipe.tags || [],
-    ingredients: _generatedRecipe.ingredients || [],
-    steps: _generatedRecipe.steps || [],
-    source: 'ai',
-    board: null
-  };
-  const ok = await upsertRecipe(recipe);
-  if (ok) {
-    recipes.push(recipe);
-    renderRecipes();
-    showStatus('Recipe saved to your vault!');
-    closeModal('ingredients-modal');
-    _generatedRecipe = null;
-  }
-}
-
-async function callAI(prompt, maxTokens) {
-  const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
-  if (isLocal) {
-    // Local dev: use Python server proxy
-    const res = await fetch('/api/ai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, maxTokens: maxTokens || 1200 })
-    });
-    const data = await res.json();
-    if (data.error) {
-      const err = new Error(data.error);
-      if (data.error.includes('429') || data.error.toLowerCase().includes('quota') || data.error.toLowerCase().includes('exhausted')) err.isRateLimit = true;
-      throw err;
-    }
-    return data.text;
-  } else {
-    // Production (GitHub Pages / phone): call Gemini directly
-    const res = await fetch(GEMINI_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_KEY },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: maxTokens || 1200, temperature: 0.7 }
-      })
-    });
-    if (!res.ok) {
-      const e = await res.json().catch(() => ({}));
-      const err = new Error(e.error?.message || 'Gemini error ' + res.status);
-      if (res.status === 429) err.isRateLimit = true;
-      throw err;
-    }
-    const data = await res.json();
-    let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-    return text;
-  }
-}
-
-// ── INIT ─────────────────────────────────────────────────────────────────────
 async function init() {
-  showStatus('Connecting to your vault...', 'var(--leaf)');
-  const ok = initDB();
-  if (!ok) return;
-  await loadRecipes();
-  await loadMealPlan();
-  await loadGroceries();
-  showStatus('✓ Connected to Recipe Vault', 'var(--leaf)');
-  setTimeout(hideStatus, 2000);
+  if (!initDB()) return;
+  initAuth(); // INITIAL_SESSION fires immediately for existing sessions; SIGNED_IN for magic links
 }
-
-// Restore last active screen instantly before data loads to avoid flash
-(function() {
-  const s = localStorage.getItem('rv_active_screen');
-  if (s && s !== 'home') {
-    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    const screen = document.getElementById('screen-' + s);
-    const nav = document.querySelector(`.nav-item[onclick*="'${s}'"]`);
-    if (screen) screen.classList.add('active');
-    if (nav) nav.classList.add('active');
-  }
-})();
 
 init();
 </script>
