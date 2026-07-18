@@ -19,7 +19,7 @@
 <!-- PostHog analytics -->
 <script>
 !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var n=e.split(".");2==n.length&&(t=t[n[0]],e=n[1]);t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}var u=t.createElement("script");u.type="text/javascript";u.async=!0;u.src=s.api_host+"/static/array.js";var l=t.getElementsByTagName("script")[0];l.parentNode.insertBefore(u,l);var _=e;a&&(a!="undefined"&&typeof a=="object"&&(_=e[a]=[]));_.people=_.people||[];_.toString=function(t){var e="posthog";return"undefined"!=typeof a&&(e+="."+a);t||(e+=" (stub)");return e};_.people.toString=function(){return _.toString(1)+".people (stub)"};o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" ");for(n=0;n<o.length;n++)g(_,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-posthog.init('__POSTHOG_KEY__', {api_host: 'https://us.i.posthog.com', person_profiles: 'identified_only'});
+var _phk='__POSTHOG_KEY__';if(_phk&&_phk.indexOf('__')===-1)posthog.init(_phk,{api_host:'https://us.i.posthog.com',person_profiles:'identified_only'});
 </script>
 
 <!-- Sentry frontend: added via Capacitor build, skipped for PWA -->
