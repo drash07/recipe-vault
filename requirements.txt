@@ -1,1 +1,6 @@
--r server/requirements.txt
+flask
+flask-cors
+flask-limiter
+waitress
+instagrapi
+sentry-sdk[flask]
