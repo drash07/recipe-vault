@@ -22,11 +22,8 @@
 posthog.init('__POSTHOG_KEY__', {api_host: 'https://us.i.posthog.com', person_profiles: 'identified_only'});
 </script>
 
-<!-- Sentry error tracking -->
-<script src="https://cdn.jsdelivr.net/npm/@sentry/browser@7/build/bundles/bundle.min.js" crossorigin="anonymous"></script>
-<script>
-if (window.Sentry) Sentry.init({ dsn: '__SENTRY_DSN__', tracesSampleRate: 0 });
-</script>
+<!-- Sentry frontend: added via Capacitor build, skipped for PWA -->
+<script>if (window.Sentry) Sentry.init({ dsn: '__SENTRY_DSN__', tracesSampleRate: 0 });</script>
 </head>
 <body>
 

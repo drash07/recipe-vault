@@ -20,9 +20,9 @@ SESSION_FILE = ROOT / 'metadata' / 'ig_session.json'
 _ig_client   = None
 
 def load_env():
-    env      = {}
+    env      = dict(os.environ)   # Railway / production env vars
     env_file = ROOT / '.env'
-    if env_file.exists():
+    if env_file.exists():         # local .env overrides when present
         for line in env_file.read_text().splitlines():
             line = line.strip()
             if line and not line.startswith('#') and '=' in line:
