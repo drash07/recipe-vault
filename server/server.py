@@ -131,7 +131,6 @@ def index():
     html = html.replace('__SUPABASE_KEY__', SUPABASE_KEY)
     html = html.replace('__POSTHOG_KEY__', POSTHOG_KEY)
     html = html.replace('__SENTRY_DSN__', SENTRY_DSN)
-    html = html.replace('__API_BASE__', '')
     return make_response(html, 200, {'Content-Type': 'text/html'})
 
 @app.route('/<path:path>')

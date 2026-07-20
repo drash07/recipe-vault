@@ -8,7 +8,7 @@ Ground truth for the project. Read this before touching any file. All architectu
 
 Recipe Vault is a personal meal-planning PWA. Core features: weekly meal plan, shared recipe vault, AI suggestions, smart grocery list, and Instagram recipe import. The app supports all dietary preferences (vegetarian, vegan, flexible, custom allergies) configured per user during onboarding. Targeting mobile-first deployment as a PWA today and a Capacitor native app (Phase 4).
 
-**Live URL:** https://drash07.github.io/recipe-vault/
+**Live URL:** https://recipe-vault-production-0220.up.railway.app
 **Working directory:** `C:\Users\patel\Downloads\recipe-vault\`
 
 ---
@@ -24,7 +24,7 @@ Recipe Vault is a personal meal-planning PWA. Core features: weekly meal plan, s
 | Auth | Supabase magic link (passwordless email) | No passwords |
 | AI | Claude Haiku (`claude-haiku-4-5-20251001`) | Server-side only — key never in browser |
 | Instagram import | `instagrapi` (Python) | Private mobile API; requires `sessionid` cookie |
-| Hosting (web) | GitHub Pages | Auto-deploy via `.github/workflows/deploy.yml` |
+| Hosting (web + server) | Railway | Auto-deploy on push to `main` via Railway GitHub integration |
 | Hosting (server) | Railway (Step 4) | Env vars in Railway dashboard |
 | Mobile (Phase 4) | Capacitor | Wraps PWA; `@capacitor/browser` for Instagram OAuth |
 
@@ -278,7 +278,7 @@ profiles     — user_id, display_name, dietary_type, eggs_ok, sweet_pref,
 - **Claude API key never touches the browser.** Lives in `server/.env` only.
 - `index.html` may only contain the Supabase anon key (public by design) and Supabase URL.
 - No sensitive data in `localStorage` — session tokens managed by the Supabase SDK.
-- CORS is currently `*` for dev. Lock to GitHub Pages + Railway domains before public launch.
+- CORS is currently `*` for dev. Lock to the Railway domain before public launch.
 
 ---
 
@@ -375,15 +375,13 @@ On `localhost`, `src/features/auth/auth.js` skips the login flow and loads Drash
 
 ## Deployment
 
-### Web → GitHub Pages
+### Web + Server → Railway
 
-Push to `main` → GitHub Actions (`.github/workflows/deploy.yml`) injects `SUPABASE_URL` + `SUPABASE_KEY` from GitHub Secrets into `index.html` → deploys.
+Push to `main` → Railway auto-deploys via GitHub integration → Flask serves `index.html` with secrets injected at request time.
 
 **Only deploy when Drashti explicitly says "deploy." Never proactively.**
 
-### Server → Railway (Step 4)
-
-Set `CLAUDE_KEY`, `SUPABASE_URL`, `SUPABASE_KEY` in Railway environment. Server runs via Gunicorn after Step 2 (Flask upgrade).
+Required Railway environment variables: `CLAUDE_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`, `POSTHOG_KEY`, `SENTRY_DSN`.
 
 ### Mobile → Capacitor (Phase 4)
 
@@ -391,7 +389,6 @@ Build order — always follow this sequence:
 
 ```bash
 # 1. Ensure server is deployed on Railway first
-# 2. Update API base URL in src/core/ai.js and src/core/db.client.js to Railway URL
 npx cap sync                  # syncs web assets to android/ and ios/
 npx cap open android          # opens Android Studio → build AAB → Google Play Internal Testing
 npx cap open ios              # opens Xcode (Mac only) → build IPA → TestFlight
@@ -402,9 +399,9 @@ npx cap open ios              # opens Xcode (Mac only) → build IPA → TestFli
 ## Pre-Launch Checklist
 
 - [x] Step 1 — Claude API switch (server-side, key never in browser)
-- [ ] Step 2 — Flask + Gunicorn, rate limiting on `/api/ai` and `/api/ig/*`
-- [ ] Step 3 — PostHog analytics + Sentry error tracking
-- [ ] Step 4 — Railway deploy (must be done before mobile build)
+- [x] Step 2 — Flask + Waitress, rate limiting on `/api/ai` and `/api/ig/*`
+- [x] Step 3 — PostHog analytics + Sentry error tracking
+- [x] Step 4 — Railway deploy
 - [ ] Step 5 — Capacitor + Android + Google Play Internal Testing
 - [ ] Step 6 — iOS + TestFlight (requires Mac + $99 Apple Developer account)
 

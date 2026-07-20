@@ -218,7 +218,7 @@ Browser (recipe-vault.html)
 - [x] Dips & Dressings filter chip — added, filters by board field
 - [x] Soup filter chip — was broken (no filter logic), fixed
 - [x] Week grid day pills mobile spacing — overflow-x scroll + min-width:40px
-- [x] GitHub Pages hosting — live at https://drash07.github.io/recipe-vault/
+- [x] Railway hosting — live at https://recipe-vault-production-0220.up.railway.app
 - [ ] @dillifoodies Instagram recipes not yet added (use Paste from Instagram feature)
 - [ ] Two unknown Pinterest sections never identified
 - [ ] Grocery dedup: upgrade to Gemini AI cleanup (currently using offline fuzzy match — free tier constraint)
