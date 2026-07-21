@@ -1,0 +1,9 @@
+{
+  "appId": "com.recipevault.app",
+  "appName": "Recipe Vault",
+  "webDir": "www",
+  "server": {
+    "url": "https://recipe-vault-production-0220.up.railway.app",
+    "cleartext": false
+  }
+}

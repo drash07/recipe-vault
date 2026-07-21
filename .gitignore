@@ -14,6 +14,11 @@ metadata/ig_posts_raw.json
 # Temp Word files
 ~$*.docx
 
+# Node / Capacitor (build tools — not needed in repo)
+node_modules/
+android/
+ios/
+
 # Python
 __pycache__/
 *.pyc
