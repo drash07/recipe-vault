@@ -17,6 +17,7 @@ let currentUser = null;
 let userProfile = null;
 
 // ── TRANSIENT UI STATE ────────────────────────────────────────────
+let _pendingOtpEmail   = '';
 let pendingImport      = null;
 let aiSuggestions      = [];
 let smartPlanResult    = null;

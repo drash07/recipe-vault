@@ -38,10 +38,10 @@ var _phk='__POSTHOG_KEY__';if(_phk&&_phk.indexOf('__')===-1)posthog.init(_phk,{a
       <div class="overlay-hint">Enter your email to sign in or create an account — we'll send you a magic link, no password needed.</div>
       <div class="input-group">
         <label class="input-label">Email address</label>
-        <input class="input" id="login-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')sendMagicLink()"/>
+        <input class="input" id="login-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')sendOtp()"/>
       </div>
       <div id="login-error" style="font-size:12px;color:#C0392B;margin-bottom:10px;min-height:18px"></div>
-      <button class="btn btn-primary btn-full" id="login-btn" onclick="sendMagicLink()">Send me a login link</button>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="sendOtp()">Send code</button>
 
       <!-- TODO: Phone OTP option
       <div style="text-align:center;font-size:12px;color:var(--text-muted);margin:12px 0">— or —</div>
@@ -52,17 +52,22 @@ var _phk='__POSTHOG_KEY__';if(_phk&&_phk.indexOf('__')===-1)posthog.init(_phk,{a
         verifyPhoneOtp(phone, token) → db.auth.verifyOtp({ phone, token, type: 'sms' })
       -->
     </div>
-    <!-- Step 2: check inbox -->
+    <!-- Step 2: enter OTP code -->
     <div id="login-step-2" style="display:none;text-align:center">
       <div style="font-size:40px;margin-bottom:12px">✉️</div>
-      <div class="overlay-title" style="text-align:center">Check your inbox</div>
+      <div class="overlay-title" style="text-align:center">Check your email</div>
       <div class="overlay-hint" style="text-align:center">
-        We sent a login link to<br/>
-        <strong id="login-sent-email"></strong><br/>
-        Tap the link in the email to sign in.
+        We sent a 6-digit code to<br/>
+        <strong id="login-sent-email"></strong>
       </div>
-      <button class="btn btn-outline btn-full" onclick="resendMagicLink()" style="margin-bottom:8px">← Change email</button>
-      <div style="font-size:11px;color:var(--text-muted);text-align:center">Didn't get it? Check your spam folder.</div>
+      <input class="input" id="login-otp" type="text" inputmode="numeric" maxlength="6" placeholder="000000"
+        style="text-align:center;font-size:28px;letter-spacing:10px;margin:16px 0"
+        onkeydown="if(event.key==='Enter')verifyOtp()"/>
+      <div id="login-otp-error" style="font-size:12px;color:#C0392B;margin-bottom:10px;min-height:18px"></div>
+      <button class="btn btn-primary btn-full" id="verify-btn" onclick="verifyOtp()">Verify</button>
+      <button class="btn btn-outline btn-full" onclick="resendOtp()" style="margin-top:8px">Resend code</button>
+      <button class="btn btn-outline btn-full" onclick="resetLoginForm()" style="margin-top:8px">← Change email</button>
+      <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px">Didn't get it? Check your spam folder.</div>
     </div>
   </div>
 </div>

@@ -26,7 +26,7 @@ function showApp() {
 }
 
 // ── AUTH ACTIONS ──────────────────────────────────────────────────
-async function sendMagicLink() {
+async function sendOtp() {
   const email = document.getElementById('login-email').value.trim();
   if (!email || !email.includes('@')) {
     document.getElementById('login-error').textContent = 'Please enter a valid email address.';
@@ -37,18 +37,47 @@ async function sendMagicLink() {
   btn.disabled  = true;
   document.getElementById('login-error').textContent = '';
 
-  const redirectTo = window.location.origin + window.location.pathname;
-  const { error } = await db.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+  const { error } = await db.auth.signInWithOtp({ email });
 
   if (error) {
     document.getElementById('login-error').textContent = error.message;
-    btn.textContent = 'Send me a login link';
+    btn.textContent = 'Send code';
     btn.disabled    = false;
   } else {
+    _pendingOtpEmail = email;
     document.getElementById('login-step-1').style.display = 'none';
     document.getElementById('login-step-2').style.display = 'block';
     document.getElementById('login-sent-email').textContent = email;
+    document.getElementById('login-otp').value = '';
+    document.getElementById('login-otp-error').textContent = '';
   }
+}
+
+async function verifyOtp() {
+  const code = document.getElementById('login-otp').value.trim();
+  if (code.length !== 6) {
+    document.getElementById('login-otp-error').textContent = 'Please enter the 6-digit code from your email.';
+    return;
+  }
+  const btn = document.getElementById('verify-btn');
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled  = true;
+  document.getElementById('login-otp-error').textContent = '';
+
+  const { error } = await db.auth.verifyOtp({ email: _pendingOtpEmail, token: code, type: 'email' });
+
+  if (error) {
+    document.getElementById('login-otp-error').textContent = error.message;
+    btn.textContent = 'Verify';
+    btn.disabled    = false;
+  }
+}
+
+async function resendOtp() {
+  document.getElementById('login-step-2').style.display = 'none';
+  document.getElementById('login-step-1').style.display = 'block';
+  document.getElementById('login-email').value = _pendingOtpEmail;
+  await sendOtp();
 }
 
 function resetLoginForm() {
@@ -57,7 +86,7 @@ function resetLoginForm() {
   document.getElementById('login-email').value           = '';
   document.getElementById('login-error').textContent     = '';
   const btn = document.getElementById('login-btn');
-  btn.textContent = 'Send me a login link';
+  btn.textContent = 'Send code';
   btn.disabled    = false;
 }
 
