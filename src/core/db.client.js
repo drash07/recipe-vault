@@ -12,7 +12,8 @@ function initDB() {
     });
     return true;
   } catch(e) {
-    showError('Could not connect to database.');
+    console.error('initDB failed:', e);
+    document.getElementById('login-error').textContent = 'Could not connect — please refresh.';
     return false;
   }
 }
