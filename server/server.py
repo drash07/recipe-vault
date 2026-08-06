@@ -125,6 +125,7 @@ def _sb_request(method, path, token, data=None):
 
 # ── STATIC FILES ──────────────────────────────────────────────────
 @app.route('/')
+@app.route('/index.html')
 def index():
     html = (ROOT / 'index.html').read_text(encoding='utf-8')
     html = html.replace('__SUPABASE_URL__', SUPABASE_URL)
