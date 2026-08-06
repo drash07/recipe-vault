@@ -131,7 +131,10 @@ def index():
     html = html.replace('__SUPABASE_KEY__', SUPABASE_KEY)
     html = html.replace('__POSTHOG_KEY__', POSTHOG_KEY)
     html = html.replace('__SENTRY_DSN__', SENTRY_DSN)
-    return make_response(html, 200, {'Content-Type': 'text/html'})
+    return make_response(html, 200, {
+        'Content-Type': 'text/html',
+        'Cache-Control': 'no-store, no-cache, must-revalidate'
+    })
 
 @app.route('/<path:path>')
 def static_files(path):
