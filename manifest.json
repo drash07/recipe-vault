@@ -2,7 +2,7 @@
   "name": "Recipe Vault",
   "short_name": "Recipe Vault",
   "description": "Drashti's personal meal planning app",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#FDFAF5",
