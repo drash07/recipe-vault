@@ -13,7 +13,10 @@ function initDB() {
     return true;
   } catch(e) {
     console.error('initDB failed:', e);
-    document.getElementById('login-error').textContent = 'Could not connect — please refresh.';
+    const isUndefined = typeof window.supabase === 'undefined';
+    document.getElementById('login-error').textContent = isUndefined
+      ? 'ERR: script not loaded'
+      : ('ERR: ' + e.message);
     return false;
   }
 }
